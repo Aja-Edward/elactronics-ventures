@@ -14,8 +14,16 @@
 //      media library able to answer "what is using this asset?" before
 //      someone deletes it out from under a live page.
 
+// v7's native generator. The legacy `prisma-client-js` provider works, but it
+// writes into node_modules — which under pnpm means a directory named after a
+// peer-dependency hash, inside the virtual store. That path is not stable, is
+// never committed, and only exists after `postinstall` has run, so a schema
+// edit without a regenerate fails at runtime with a bare "Cannot find module
+// '.prisma/client/default'". An explicit output puts the client somewhere
+// predictable and greppable instead.
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
