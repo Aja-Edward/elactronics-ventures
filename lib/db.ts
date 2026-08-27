@@ -1,8 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-
-// Relative rather than the "@/" alias on purpose: seed and maintenance scripts
-// run outside Next's bundler, where that alias does not resolve.
-import { PrismaClient } from "./generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * Prisma client singleton.
