@@ -38,7 +38,9 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const regionRef = useRef<HTMLDivElement>(null);
+  const prevIndexRef = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -49,7 +51,12 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
   }, []);
 
   const go = useCallback(
-    (next: number) => setIndex((next + slides.length) % slides.length),
+    (next: number) => {
+      const newIndex = (next + slides.length) % slides.length;
+      setDirection(newIndex > prevIndexRef.current ? "next" : "prev");
+      prevIndexRef.current = newIndex;
+      setIndex(newIndex);
+    },
     [slides.length],
   );
 
@@ -82,19 +89,23 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
         <div
           key={slide.id}
           aria-hidden={i !== index}
-          className={`absolute inset-0 transition-opacity duration-700 ${
+          className={`absolute inset-0 transition-opacity duration-1000 ${
             i === index ? "opacity-100" : "opacity-0"
           }`}
         >
           {slide.imageUrl ? (
-            <Image
-              src={slide.imageUrl}
-              alt=""
-              fill
-              priority={i === 0}
-              sizes="100vw"
-              className="object-cover"
-            />
+            <div className="relative h-full w-full overflow-hidden">
+              <Image
+                src={slide.imageUrl}
+                alt=""
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className={`object-cover transition-transform duration-[6500ms] ease-out ${
+                  i === index ? "scale-105" : "scale-100"
+                }`}
+              />
+            </div>
           ) : (
             <div className="h-full w-full bg-brand-950" />
           )}
@@ -109,12 +120,12 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
         </div>
       ))}
 
-      <div className="relative mx-auto flex min-h-[32rem] max-w-5xl items-center justify-center px-6 py-20 text-center sm:min-h-[38rem]">
+      <div className="relative mx-auto flex min-h-[32rem] max-w-5xl items-center justify-center px-6 py-20 text-center sm:min-h-[38rem]" style={{ perspective: "1000px" }}>
         {/* Keyed on the slide id so React remounts this subtree on every
             change — which is what restarts the CSS entrance animations.
             Each animated line sits in its own overflow-hidden wrapper; that
             mask is what turns a slide into a wipe. */}
-        <div aria-live="polite" aria-atomic="true" className="w-full" key={active.id}>
+        <div aria-live="polite" aria-atomic="true" className="w-full hero-slide-content" key={active.id}>
           <div className="overflow-hidden pb-1">
             <h1 className="hero-anim-title hero-text-shadow text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
               {active.title}
