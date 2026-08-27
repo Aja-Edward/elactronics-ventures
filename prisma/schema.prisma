@@ -1,0 +1,807 @@
+// Elatronics Ventures — content model
+//
+// Structure mirrors the information architecture of an industrial EPCIM
+// services site: a division taxonomy, an owned-equipment register, a project
+// record, and the supporting credibility pages (certifications, OEM
+// authorisations, clients, awards).
+//
+// Two conventions run through the whole file:
+//
+//   1. ContentStatus on every publishable entity. Draft/publish is a schema
+//      concern, not a feature bolted on later - every public read filters on
+//      status = PUBLISHED, and the admin sees everything.
+//   2. Images are Media relations, never raw URL strings. That keeps the
+//      media library able to answer "what is using this asset?" before
+//      someone deletes it out from under a live page.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN // manage users, settings, publish, delete
+  ADMIN // publish and manage all content
+  EDITOR // create and edit, cannot publish or manage users
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/// EPCIM and SERVICE_OFFERING are the two division families; PROCUREMENT is a
+/// standalone division that sits outside both.
+enum DivisionCategory {
+  EPCIM
+  SERVICE_OFFERING
+  PROCUREMENT
+}
+
+enum PostType {
+  NEWS
+  BLOG
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum SubmissionStatus {
+  NEW
+  IN_REVIEW
+  RESPONDED
+  CLOSED
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         UserRole  @default(EDITOR)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+
+  sessions  Session[]
+  auditLogs AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+}
+
+model Session {
+  id     String @id @default(cuid())
+  userId String
+
+  /// SHA-256 of the session token, never the token itself. The raw token lives
+  /// only in the user's cookie, so a leaked database dump cannot be replayed
+  /// as a valid session — the same reasoning as storing password hashes.
+  tokenHash String   @unique
+  expiresAt DateTime
+
+  /// Recorded so a user can review and revoke their own sessions later.
+  userAgent String?
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Who changed what. Cheap to write, invaluable when a client asks why a page
+/// changed. userId is nullable so deleting a user never destroys the trail.
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String // "publish", "update", "delete"
+  entityType String // "Division", "Project", ...
+  entityId   String
+  summary    String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ─── Media ───────────────────────────────────────────────────────────────────
+
+/// One row per Cloudinary asset. publicId is retained so the asset can be
+/// deleted from Cloudinary too - without it, removing a row just orphans the
+/// file and the account fills up with unreferenced uploads.
+model Media {
+  id           String    @id @default(cuid())
+  publicId     String    @unique
+  url          String
+  secureUrl    String
+  resourceType MediaType @default(IMAGE)
+  format       String?
+  width        Int?
+  height       Int?
+  bytes        Int?
+  alt          String?
+  caption      String?
+  folder       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Named back-relations, one per referencing field.
+  siteLogo        SiteSetting[]      @relation("SiteLogo")
+  siteFavicon     SiteSetting[]      @relation("SiteFavicon")
+  siteOgImage     SiteSetting[]      @relation("SiteOgImage")
+  pageHero        Page[]             @relation("PageHero")
+  pageOg          Page[]             @relation("PageOg")
+  divisionHero    Division[]         @relation("DivisionHero")
+  divisionOg      Division[]         @relation("DivisionOg")
+  serviceHero     Service[]          @relation("ServiceHero")
+  serviceOg       Service[]          @relation("ServiceOg")
+  equipmentImage  Equipment[]        @relation("EquipmentImage")
+  projectHero     Project[]          @relation("ProjectHero")
+  projectOg       Project[]          @relation("ProjectOg")
+  projectGallery  ProjectImage[]
+  postHero        Post[]             @relation("PostHero")
+  postOg          Post[]             @relation("PostOg")
+  teamPhoto       TeamMember[]
+  clientLogo      Client[]
+  oemLogo         OemPartner[]
+  certificateFile Certification[]
+  awardImage      Award[]
+  entityLogo      GroupEntity[]
+  locationImage   Location[]
+  galleryImage    GalleryImage[]
+  milestoneImage  HistoryMilestone[]
+  heroSlideImage  HeroSlide[]        @relation("HeroSlideImage")
+  quoteAttachment QuoteRequest[]
+
+  @@index([resourceType])
+  @@index([folder])
+}
+
+// ─── Global settings ─────────────────────────────────────────────────────────
+
+/// Singleton (enforced in application code by always reading/writing id = 1).
+/// Everything here would otherwise be hard-coded across dozens of components.
+model SiteSetting {
+  id Int @id @default(1)
+
+  companyName String  @default("Elatronics Ventures")
+  tagline     String?
+  legalName   String?
+  foundedYear Int?
+  rcNumber    String? // CAC registration number
+
+  logoId    String?
+  faviconId String?
+
+  addressLine   String?
+  city          String?
+  state         String?
+  country       String? @default("Nigeria")
+  googleMapsUrl String?
+
+  email        String?
+  supportEmail String?
+  phone        String?
+  /// Kept separate from phone: powers a wa.me click-to-chat link, which for
+  /// B2B enquiries in this market converts better than a tel: link.
+  whatsapp     String?
+  workingHours String?
+
+  facebook  String?
+  linkedin  String?
+  instagram String?
+  youtube   String?
+  twitter   String?
+
+  defaultSeoTitle       String?
+  defaultSeoDescription String?
+  ogImageId             String?
+  googleAnalyticsId     String?
+
+  footerNote String?
+
+  logo    Media? @relation("SiteLogo", fields: [logoId], references: [id], onDelete: SetNull)
+  favicon Media? @relation("SiteFavicon", fields: [faviconId], references: [id], onDelete: SetNull)
+  ogImage Media? @relation("SiteOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Homepage hero ───────────────────────────────────────────────────────────
+
+/// Slides for the rotating homepage hero. A dedicated model rather than a
+/// PageSection JSON blob: slides are reordered, published and image-linked
+/// individually, which is far easier to edit as rows than as nested JSON.
+model HeroSlide {
+  id       String  @id @default(cuid())
+  title    String
+  subtitle String?
+  imageId  String?
+
+  ctaLabel    String?
+  ctaHref     String?
+  ctaAltLabel String?
+  ctaAltHref  String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  image Media? @relation("HeroSlideImage", fields: [imageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+// ─── Composable pages ────────────────────────────────────────────────────────
+
+/// For editorial pages assembled from reorderable blocks (home, about).
+/// Entity-backed pages (divisions, projects) use their own models instead -
+/// forcing those through a generic section builder would lose the structure
+/// that makes them queryable and filterable.
+model Page {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  description String?
+
+  /// Long-form copy for simple content pages such as About, Terms or Privacy.
+  /// Pages that need reorderable blocks use the sections relation instead;
+  /// most editorial pages never need that complexity.
+  body String?
+
+  status ContentStatus @default(DRAFT)
+
+  heroImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+
+  sections PageSection[]
+
+  heroImage Media? @relation("PageHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   Media? @relation("PageOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+}
+
+/// `content` is deliberately Json so one model serves every section type.
+/// The trade-off is that Postgres cannot validate its shape - so each `type`
+/// has a matching Zod schema in lib/sections/, parsed on write and on read.
+/// schemaVersion lets a renderer migrate older rows instead of crashing on
+/// them when a section's shape changes.
+model PageSection {
+  id            String  @id @default(cuid())
+  pageId        String
+  type          String // "hero" | "stats" | "divisionGrid" | "cta" | ...
+  order         Int
+  content       Json
+  schemaVersion Int     @default(1)
+  isVisible     Boolean @default(true)
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pageId, order])
+  @@index([pageId])
+}
+
+// ─── Divisions and services ──────────────────────────────────────────────────
+
+/// The core taxonomy: thirteen divisions across three categories.
+model Division {
+  id       String           @id @default(cuid())
+  slug     String           @unique
+  title    String
+  category DivisionCategory
+  summary  String?
+  body     String? // rich text / MDX
+  icon     String? // lucide icon name for grids
+
+  capabilities String[] // bullet list, avoids a table for simple strings
+
+  heroImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+
+  order      Int           @default(0)
+  isFeatured Boolean       @default(false)
+  status     ContentStatus @default(DRAFT)
+
+  services Service[]
+  projects Project[]
+
+  heroImage Media? @relation("DivisionHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   Media? @relation("DivisionOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([category, status])
+  @@index([status, order])
+}
+
+/// Granular offerings beneath a division, and the skid-package systems, which
+/// sit in their own group rather than under any single division.
+model Service {
+  id         String  @id @default(cuid())
+  slug       String  @unique
+  title      String
+  divisionId String?
+  /// e.g. "skid-package" - groups services that have no parent division.
+  group      String?
+  summary    String?
+  body       String?
+
+  heroImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  division  Division? @relation(fields: [divisionId], references: [id], onDelete: SetNull)
+  heroImage Media?    @relation("ServiceHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   Media?    @relation("ServiceOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([divisionId, status])
+  @@index([group, status])
+}
+
+// ─── Owned equipment register ────────────────────────────────────────────────
+
+/// Elatronics' own inventory. Specs are per-unit facts, so they live in
+/// structured fields rather than prose - it makes the list filterable and
+/// keeps claims precise.
+model Equipment {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  description String?
+  category    String?
+  quantity    Int?
+  /// e.g. "20,000 psi", "24in x 40ft", "750 CFM"
+  specs       Json?
+
+  imageId String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  image Media? @relation("EquipmentImage", fields: [imageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, order])
+  @@index([category])
+}
+
+// ─── Projects / references ───────────────────────────────────────────────────
+
+model Project {
+  id         String  @id @default(cuid())
+  slug       String  @unique
+  title      String
+  clientName String?
+  industry   String?
+  location   String?
+  year       Int?
+  scope      String?
+  divisionId String?
+
+  challenge String?
+  solution  String?
+  results   String?
+
+  heroImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+
+  isFeatured Boolean       @default(false)
+  order      Int           @default(0)
+  status     ContentStatus @default(DRAFT)
+
+  gallery   ProjectImage[]
+  division  Division?      @relation(fields: [divisionId], references: [id], onDelete: SetNull)
+  heroImage Media?         @relation("ProjectHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   Media?         @relation("ProjectOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, year])
+  @@index([divisionId])
+}
+
+model ProjectImage {
+  id        String @id @default(cuid())
+  projectId String
+  mediaId   String
+  order     Int    @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, order])
+  @@index([projectId])
+}
+
+// ─── Credibility ─────────────────────────────────────────────────────────────
+
+model Client {
+  id      String  @id @default(cuid())
+  name    String
+  logoId  String?
+  website String?
+  sector  String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  logo Media? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+/// OEM authorisations / partnerships.
+model OemPartner {
+  id               String    @id @default(cuid())
+  name             String
+  logoId           String?
+  website          String?
+  description      String?
+  authorisationRef String?
+  authorisedFrom   DateTime?
+  authorisedUntil  DateTime?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  logo Media? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+model Certification {
+  id          String    @id @default(cuid())
+  name        String
+  issuer      String?
+  reference   String?
+  issuedAt    DateTime?
+  expiresAt   DateTime?
+  description String?
+  fileId      String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  file Media? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+model Award {
+  id          String  @id @default(cuid())
+  title       String
+  awardedBy   String?
+  year        Int?
+  description String?
+  imageId     String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  image Media? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, year])
+}
+
+model GroupEntity {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  website     String?
+  logoId      String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  logo Media? @relation(fields: [logoId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+// ─── Company ─────────────────────────────────────────────────────────────────
+
+model Location {
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  isHeadOffice Boolean @default(false)
+  addressLine  String?
+  city         String?
+  state        String?
+  country      String
+  phone        String?
+  email        String?
+  mapEmbedUrl  String?
+  latitude     Float?
+  longitude    Float?
+  imageId      String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  image Media? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+  @@index([country])
+}
+
+/// Governance / leadership.
+model TeamMember {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  role     String
+  bio      String?
+  photoId  String?
+  linkedin String?
+  email    String?
+  /// Separates board/governance listings from operational staff.
+  isBoard  Boolean @default(false)
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  photo Media? @relation(fields: [photoId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+  @@index([isBoard])
+}
+
+model HistoryMilestone {
+  id          String  @id @default(cuid())
+  year        Int
+  title       String
+  description String?
+  imageId     String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  image Media? @relation(fields: [imageId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, year])
+}
+
+// ─── Editorial ───────────────────────────────────────────────────────────────
+
+model Post {
+  id      String   @id @default(cuid())
+  slug    String   @unique
+  title   String
+  type    PostType @default(NEWS)
+  excerpt String?
+  body    String?
+  author  String?
+  tags    String[]
+
+  heroImageId    String?
+  seoTitle       String?
+  seoDescription String?
+  ogImageId      String?
+
+  isFeatured Boolean       @default(false)
+  status     ContentStatus @default(DRAFT)
+
+  heroImage Media? @relation("PostHero", fields: [heroImageId], references: [id], onDelete: SetNull)
+  ogImage   Media? @relation("PostOg", fields: [ogImageId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([type, status, publishedAt])
+}
+
+model GalleryAlbum {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  eventDate   DateTime?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  images GalleryImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+}
+
+model GalleryImage {
+  id      String @id @default(cuid())
+  albumId String
+  mediaId String
+  order   Int    @default(0)
+
+  album GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  media Media        @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, order])
+  @@index([albumId])
+}
+
+model Faq {
+  id       String  @id @default(cuid())
+  question String
+  answer   String
+  category String?
+
+  order  Int           @default(0)
+  status ContentStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, order])
+  @@index([category])
+}
+
+// ─── Inbound forms ───────────────────────────────────────────────────────────
+
+model QuoteRequest {
+  id              String  @id @default(cuid())
+  fullName        String
+  company         String
+  email           String
+  phone           String
+  serviceInterest String?
+  projectLocation String?
+  projectType     String?
+  timeline        String?
+  message         String
+  attachmentId    String?
+
+  status       SubmissionStatus @default(NEW)
+  internalNote String?
+
+  /// Retained for abuse triage; forms are public and will be scraped.
+  ipAddress String?
+  userAgent String?
+
+  attachment Media? @relation(fields: [attachmentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model ContactSubmission {
+  id      String  @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  subject String?
+  message String
+
+  status       SubmissionStatus @default(NEW)
+  internalNote String?
+  ipAddress    String?
+  userAgent    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+/// "Become our partner" enquiries - a different intent from a quote request,
+/// so it gets its own inbox rather than being folded into contact.
+model PartnerApplication {
+  id          String  @id @default(cuid())
+  companyName String
+  contactName String
+  email       String
+  phone       String?
+  country     String?
+  partnerType String?
+  message     String
+
+  status       SubmissionStatus @default(NEW)
+  internalNote String?
+  ipAddress    String?
+  userAgent    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// ─── Routing ─────────────────────────────────────────────────────────────────
+
+/// Editable 301/302 map. Needed from day one: slugs change, and any URL that
+/// has been indexed must keep resolving or the client loses that ranking.
+model Redirect {
+  id          String  @id @default(cuid())
+  source      String  @unique
+  /// destination path or absolute URL
+  destination String
+  permanent   Boolean @default(true)
+  hits        Int     @default(0)
+  note        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([source])
+}

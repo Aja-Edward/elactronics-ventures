@@ -1,26 +1,187 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Elatronics Ventures — brand theme
+
+   Palette is sampled directly from public/brand/images/Elatronics_Ventures-logo.png,
+   so the site and the mark cannot drift apart:
+
+     navy       #022162   the EPL lettering
+     red        #DB261D   the continents
+     periwinkle #7E7EB2   the oceans
+
+   NOTE: the client also specified RAL 5011 (#1A2B3C) as the company colour.
+   That is a materially different blue — desaturated steel grey rather than
+   this saturated navy — so the two cannot both be the on-screen primary.
+   The logo governs here, because it appears on every page and a header that
+   disagrees with the mark sitting on it reads as a bug. To switch, change
+   --brand-base below and regenerate the scale; nothing else references a
+   navy literal.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Type. Barlow is a grotesque with an industrial cast — it suits an
+     engineering firm without the corporate-neutral feel of the usual defaults.
+     The condensed cut carries headings; the regular cut carries text.
+     Source variables are injected by next/font in app/layout.tsx. */
+  --font-body: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), ui-sans-serif, sans-serif;
+
+  /* Brand — navy */
+  --color-brand-50: #f2f4f7;
+  --color-brand-100: #e5e8ef;
+  --color-brand-200: #cbd2df;
+  --color-brand-300: #b1bbcf;
+  --color-brand-400: #98a4bf;
+  --color-brand-500: #7e8eaf;
+  --color-brand-600: #64779f;
+  --color-brand-700: #4a608f;
+  --color-brand-800: #30497f;
+  --color-brand-900: #022162;
+  --color-brand-950: #010f2c;
+
+  /* Accent — red. Used sparingly: CTAs, active states, small emphasis.
+     5.07:1 on white, so it clears AA for body text but is happiest as a
+     button fill with white knockout. */
+  --color-accent-50: #fceeee;
+  --color-accent-100: #f9dedc;
+  --color-accent-200: #f4bcba;
+  --color-accent-300: #ee9b97;
+  --color-accent-400: #e97a74;
+  --color-accent-500: #e35952;
+  --color-accent-600: #db261d;
+  --color-accent-700: #b92018;
+  --color-accent-800: #961a14;
+  --color-accent-900: #74140f;
+  --color-accent-950: #63110d;
+
+  /* Steel — the mark's periwinkle. Section grounds, muted text, hovers. */
+  --color-steel-50: #f0f0f6;
+  --color-steel-100: #e1e1ed;
+  --color-steel-200: #c4c4dc;
+  --color-steel-300: #a6a6ca;
+  --color-steel-400: #7e7eb2;
+  --color-steel-500: #7171a0;
+  --color-steel-600: #65658e;
+  --color-steel-700: #58587d;
+  --color-steel-800: #4c4c6b;
+  --color-steel-900: #3f3f59;
+  --color-steel-950: #393950;
+}
+
+/* Semantic tokens. Components reference these, never the scale directly, so a
+   palette change stays a one-file edit. */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #f7f8fa;
+  --surface-raised: #ffffff;
+  --border: var(--color-brand-200);
+  --foreground: var(--color-brand-950);
+  --muted: var(--color-steel-700);
+  --primary: var(--color-brand-900);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-accent-600);
+  --accent-foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Long-form CMS copy runs at a readable measure by default. */
+.prose-measure {
+  max-width: 68ch;
+}
+
+/* Legibility over an undimmed photograph. Carrying the contrast on the
+   text itself, rather than darkening the whole image, keeps the picture
+   bright while still guaranteeing the headline reads. */
+.hero-text-shadow {
+  text-shadow:
+    0 1px 2px rgb(1 15 44 / 0.55),
+    0 2px 12px rgb(1 15 44 / 0.45);
+}
+
+/* ─── Hero slide entrance ─────────────────────────────────────────────────────
+   Mirrors the reference site's Revolution Slider configuration:
+     title    transform_in x:[-175%] with mask_in x:[100%]  -> wipe from left
+     subtitle transform_in y:[100%]                          -> rise from below
+     easing   Power3.easeInOut, ~1000ms
+   Power3.easeInOut maps closely to cubic-bezier(.77,0,.175,1).
+
+   Each element sits inside an overflow-hidden wrapper, which is what produces
+   the masked wipe rather than a plain slide.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes hero-wipe-left {
+  from {
+    transform: translate3d(-105%, 0, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    transform: translate3d(0, 105%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-fade-up {
+  from {
+    transform: translate3d(0, 1.25rem, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.hero-anim-title {
+  animation: hero-wipe-left 1000ms cubic-bezier(0.77, 0, 0.175, 1) both;
+}
+
+.hero-anim-subtitle {
+  animation: hero-rise 1000ms cubic-bezier(0.77, 0, 0.175, 1) both;
+  animation-delay: 180ms;
+}
+
+.hero-anim-cta {
+  animation: hero-fade-up 700ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  animation-delay: 420ms;
+}
+
+/* Entrance movement is decorative. Under reduced motion the content still
+   appears — it simply arrives without travelling. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim-title,
+  .hero-anim-subtitle,
+  .hero-anim-cta {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

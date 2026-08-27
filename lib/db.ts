@@ -1,0 +1,49 @@
+import { PrismaPg } from "@prisma/adapter-pg";
+
+// Relative rather than the "@/" alias on purpose: seed and maintenance scripts
+// run outside Next's bundler, where that alias does not resolve.
+import { PrismaClient } from "./generated/prisma/client";
+
+/**
+ * Prisma client singleton.
+ *
+ * Two things this file exists to get right:
+ *
+ * 1. Connection endpoint. Neon exposes a direct endpoint and a pooled
+ *    (PgBouncer) one. Serverless functions each open their own connection, so
+ *    the runtime must use the pooled endpoint or Postgres runs out of
+ *    connections under load. Migrations are the opposite case and need the
+ *    direct endpoint - that one is wired separately in prisma7.config.ts.
+ *
+ * 2. Hot reload. Next.js re-evaluates modules on every change in development,
+ *    and a fresh PrismaClient per reload leaks connections until the pool is
+ *    exhausted. Caching on globalThis keeps one instance across reloads.
+ */
+
+const connectionString =
+  process.env.DATABASE_URL_POOLED ?? process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error(
+    "No database connection string. Set DATABASE_URL_POOLED (preferred) or DATABASE_URL.",
+  );
+}
+
+const createPrismaClient = () =>
+  new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "warn", "error"]
+        : ["error"],
+  });
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof createPrismaClient> | undefined;
+};
+
+export const db = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = db;
+}
