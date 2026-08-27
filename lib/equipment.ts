@@ -51,5 +51,5 @@ export async function getPublishedEquipment() {
     },
   });
 
-  return rows.map((row) => ({ ...row, specs: parseSpecs(row.specs) }));
+  return rows.map((row: (typeof rows)[number]) => ({ ...row, specs: parseSpecs(row.specs) }));
 }

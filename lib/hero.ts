@@ -18,7 +18,7 @@ export async function getPublishedHeroSlides() {
     },
   });
 
-  return rows.map((r) => ({
+  return rows.map((r: (typeof rows)[number]) => ({
     id: r.id,
     title: r.title,
     subtitle: r.subtitle,

@@ -38,7 +38,7 @@ export async function getNavItems(): Promise<NavItem[]> {
     {
       label: "Divisions",
       href: "/divisions",
-      children: divisions.map((d) => ({
+      children: divisions.map((d: (typeof divisions)[number]) => ({
         label: d.title,
         href: `/divisions/${d.slug}`,
       })),

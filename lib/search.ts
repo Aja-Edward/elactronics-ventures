@@ -76,23 +76,23 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
   ]);
 
   return [
-    ...divisions.map((d): SearchHit => ({
+    ...divisions.map((d: (typeof divisions)[number]): SearchHit => ({
       id: d.id, title: d.title, excerpt: d.summary,
       href: `/divisions/${d.slug}`, kind: "Division",
     })),
-    ...equipment.map((e): SearchHit => ({
+    ...equipment.map((e: (typeof equipment)[number]): SearchHit => ({
       id: e.id, title: e.name, excerpt: e.description,
       href: "/equipment", kind: "Equipment",
     })),
-    ...projects.map((p): SearchHit => ({
+    ...projects.map((p: (typeof projects)[number]): SearchHit => ({
       id: p.id, title: p.title, excerpt: p.scope,
       href: `/projects/${p.slug}`, kind: "Project",
     })),
-    ...posts.map((p): SearchHit => ({
+    ...posts.map((p: (typeof posts)[number]): SearchHit => ({
       id: p.id, title: p.title, excerpt: p.excerpt,
       href: `/news/${p.slug}`, kind: "News",
     })),
-    ...certifications.map((c): SearchHit => ({
+    ...certifications.map((c: (typeof certifications)[number]): SearchHit => ({
       id: c.id, title: c.name, excerpt: c.issuer,
       href: "/certifications", kind: "Certification",
     })),

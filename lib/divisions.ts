@@ -90,5 +90,5 @@ export async function getDivisionSlugs() {
     where: { status: "PUBLISHED" },
     select: { slug: true },
   });
-  return rows.map((r) => r.slug);
+  return rows.map((r: { slug: string }) => r.slug);
 }

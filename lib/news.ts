@@ -46,7 +46,7 @@ export async function getPostSlugs() {
   cacheTag(tags.posts());
   cacheLife("days");
   const rows = await db.post.findMany({ where: { status: "PUBLISHED" }, select: { slug: true } });
-  return rows.map((r) => r.slug);
+  return rows.map((r: { slug: string }) => r.slug);
 }
 
 /** Consistent, locale-stable date rendering for listings and articles. */
