@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 export type HeroSlideData = {
   id: string;
@@ -17,6 +17,152 @@ export type HeroSlideData = {
 };
 
 const INTERVAL_MS = 6500;
+
+/**
+ * How long the outgoing-image overlay stays mounted. Every transition below is
+ * built to finish inside this window (longest is ~1130ms of stagger + travel);
+ * the remainder is slack. Overshooting is harmless — by then the overlay is
+ * fully transparent or fully off-frame — but undershooting would cut an
+ * animation short, so the buffer only ever errs long.
+ */
+const TRANSITION_MS = 1300;
+
+/**
+ * The reference site sets `data-transition="random"` on every slide, letting
+ * Slider Revolution draw a different image effect on each advance. This is the
+ * pool it draws from, grouped the same way: box grids, strip ("slot") wipes,
+ * whole-frame pans, and a plain dissolve.
+ *
+ * `cols`/`rows` describe how the outgoing frame is cut up; `stagger` is the
+ * per-cell delay step, and `order` decides which cell goes when.
+ */
+type TransitionSpec = {
+  name: string;
+  cols: number;
+  rows: number;
+  stagger: number;
+  /** Sweep order for staggered effects. Omitted means every cell fires at once. */
+  order?: "diagonal" | "row" | "col" | "scatter";
+};
+
+const TRANSITIONS: TransitionSpec[] = [
+  { name: "fade", cols: 1, rows: 1, stagger: 0 },
+  { name: "boxfade", cols: 6, rows: 4, stagger: 26, order: "scatter" },
+  { name: "boxslide", cols: 6, rows: 4, stagger: 55, order: "diagonal" },
+  { name: "slotfade-vertical", cols: 1, rows: 8, stagger: 60, order: "row" },
+  { name: "slotslide-vertical", cols: 1, rows: 8, stagger: 55, order: "row" },
+  { name: "slotslide-horizontal", cols: 10, rows: 1, stagger: 45, order: "col" },
+  { name: "slotzoom-horizontal", cols: 8, rows: 1, stagger: 55, order: "col" },
+  { name: "curtain", cols: 2, rows: 1, stagger: 0 },
+  { name: "slideleft", cols: 1, rows: 1, stagger: 0 },
+  { name: "slideright", cols: 1, rows: 1, stagger: 0 },
+  { name: "slideup", cols: 1, rows: 1, stagger: 0 },
+  { name: "slidedown", cols: 1, rows: 1, stagger: 0 },
+];
+
+/**
+ * Picks the next effect, refusing to repeat the previous one. Revolution's own
+ * picker is a bare `Math.random()` and will happily play the same transition
+ * twice; excluding the last one costs nothing and reads as more deliberate.
+ */
+function pickTransition(previous: string | null): TransitionSpec {
+  const pool = previous ? TRANSITIONS.filter((t) => t.name !== previous) : TRANSITIONS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/**
+ * Deterministic-per-cell scatter. A real shuffle would need to be memoised to
+ * survive re-renders; hashing the cell index instead gives a fixed, unordered-
+ * looking sequence for free. The multiplier is coprime with typical grid sizes,
+ * so cells that are adjacent on screen land far apart in time.
+ */
+function cellDelay(spec: TransitionSpec, c: number, r: number, i: number): number {
+  if (!spec.stagger) return 0;
+  switch (spec.order) {
+    case "diagonal":
+      return (c + r) * spec.stagger;
+    case "row":
+      return r * spec.stagger;
+    case "col":
+      return c * spec.stagger;
+    case "scatter":
+      return ((i * 7) % (spec.cols * spec.rows)) * spec.stagger;
+    default:
+      return 0;
+  }
+}
+
+type OutgoingState = {
+  slide: HeroSlideData;
+  spec: TransitionSpec;
+  /** Bumped on every advance so React remounts the overlay and restarts the CSS. */
+  runId: number;
+};
+
+/**
+ * The outgoing frame, cut into clip windows that animate out of the way.
+ *
+ * Each cell holds a full-frame `<Image>` offset so only its own slice shows.
+ * That costs more nodes than tiling a single stretched background would, but it
+ * keeps `object-cover` framing identical to the base layer — a stretched tile
+ * grid distorts on any aspect ratio but the image's own. The `src` and `sizes`
+ * match the base layer exactly, so every cell is a cache hit rather than a
+ * fresh download.
+ */
+function TransitionOverlay({ slide, spec }: { slide: HeroSlideData; spec: TransitionSpec }) {
+  if (!slide.imageUrl) return null;
+
+  const cells = [];
+  for (let r = 0; r < spec.rows; r++) {
+    for (let c = 0; c < spec.cols; c++) {
+      const i = r * spec.cols + c;
+      cells.push(
+        <div
+          key={i}
+          className="hero-tx-slot"
+          style={
+            {
+              "--c": c,
+              "--r": r,
+              "--d": `${cellDelay(spec, c, r, i)}ms`,
+            } as CSSProperties
+          }
+        >
+          <div className="hero-tx-img">
+            {/* Eager, not lazy. The overlay lives for barely a second, and
+                `loading="lazy"` defers past that — the cells would animate out
+                empty. The URL matches the base layer's, so this resolves
+                against the cache rather than costing a second fetch. */}
+            <Image
+              src={slide.imageUrl}
+              alt=""
+              fill
+              sizes="100vw"
+              loading="eager"
+              className="object-cover"
+            />
+            {/* The same wash the base layers carry. It lives inside the mover —
+                which spans the whole frame, not just this cell — so the
+                gradient stays registered with the one underneath instead of
+                restarting inside every cell. */}
+            <div className="absolute inset-0 bg-brand-950/25" />
+            <div className="absolute inset-0 bg-gradient-to-b from-brand-950/25 via-transparent to-brand-950/55" />
+          </div>
+        </div>,
+      );
+    }
+  }
+
+  return (
+    <div
+      aria-hidden
+      className={`hero-tx hero-tx--${spec.name}`}
+      style={{ "--cols": spec.cols, "--rows": spec.rows } as CSSProperties}
+    >
+      {cells}
+    </div>
+  );
+}
 
 /**
  * Rotating hero.
@@ -38,33 +184,65 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [direction, setDirection] = useState<"next" | "prev">("next");
+  const [outgoing, setOutgoing] = useState<OutgoingState | null>(null);
   const regionRef = useRef<HTMLDivElement>(null);
-  const prevIndexRef = useRef(0);
+  // `go` reads the live index without taking it as a dependency, so the
+  // auto-advance interval is not torn down and rebuilt on every slide.
+  const indexRef = useRef(0);
+  const runIdRef = useRef(0);
+  const lastTransitionRef = useRef<string | null>(null);
+  const reducedMotionRef = useRef(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    reducedMotionRef.current = mq.matches;
+    const onChange = (e: MediaQueryListEvent) => {
+      setReducedMotion(e.matches);
+      reducedMotionRef.current = e.matches;
+    };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
   const go = useCallback(
     (next: number) => {
-      const newIndex = (next + slides.length) % slides.length;
-      setDirection(newIndex > prevIndexRef.current ? "next" : "prev");
-      prevIndexRef.current = newIndex;
+      const len = slides.length;
+      const newIndex = ((next % len) + len) % len;
+      if (newIndex === indexRef.current) return;
+
+      // The incoming slide is swapped in underneath immediately; the departing
+      // one is handed to the overlay to animate away over the top of it.
+      if (!reducedMotionRef.current) {
+        const spec = pickTransition(lastTransitionRef.current);
+        lastTransitionRef.current = spec.name;
+        runIdRef.current += 1;
+        setOutgoing({ slide: slides[indexRef.current], spec, runId: runIdRef.current });
+      }
+
+      indexRef.current = newIndex;
       setIndex(newIndex);
     },
-    [slides.length],
+    [slides],
   );
 
   useEffect(() => {
     if (slides.length < 2 || paused || reducedMotion) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), INTERVAL_MS);
+    const t = setInterval(() => go(indexRef.current + 1), INTERVAL_MS);
     return () => clearInterval(t);
-  }, [slides.length, paused, reducedMotion]);
+  }, [slides.length, paused, reducedMotion, go]);
+
+  // Tear the overlay down once its animation is spent. Keyed on runId so a
+  // rapid second advance restarts the clock rather than letting the first
+  // timer retire the newer overlay early.
+  useEffect(() => {
+    if (!outgoing) return;
+    const runId = outgoing.runId;
+    const t = setTimeout(() => {
+      setOutgoing((current) => (current?.runId === runId ? null : current));
+    }, TRANSITION_MS);
+    return () => clearTimeout(t);
+  }, [outgoing]);
 
   if (slides.length === 0) return null;
 
@@ -89,9 +267,13 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
         <div
           key={slide.id}
           aria-hidden={i !== index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            i === index ? "opacity-100" : "opacity-0"
-          }`}
+          // The swap itself is instant: the overlay above is what the eye reads
+          // as the transition, and a simultaneous cross-fade underneath would
+          // wash it out. Under reduced motion no overlay mounts, so the layer
+          // carries a plain dissolve on its own.
+          className={`absolute inset-0 ${
+            reducedMotion ? "transition-opacity duration-700" : ""
+          } ${i === index ? "opacity-100" : "opacity-0"}`}
         >
           {slide.imageUrl ? (
             <div className="relative h-full w-full overflow-hidden">
@@ -100,6 +282,12 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
                 alt=""
                 fill
                 priority={i === 0}
+                // Only the first slide is preloaded, but the rest still load
+                // eagerly: they are all above the fold and every one of them is
+                // on screen within a few seconds. Left lazy, a slide could be
+                // swapped in before its image had started fetching and show an
+                // empty frame — which the instant swap would make obvious.
+                loading={i === 0 ? undefined : "eager"}
                 sizes="100vw"
                 className={`object-cover transition-transform duration-[6500ms] ease-out ${
                   i === index ? "scale-105" : "scale-100"
@@ -119,6 +307,10 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
           <div className="absolute inset-0 bg-gradient-to-b from-brand-950/25 via-transparent to-brand-950/55" />
         </div>
       ))}
+
+      {outgoing && (
+        <TransitionOverlay key={outgoing.runId} slide={outgoing.slide} spec={outgoing.spec} />
+      )}
 
       <div className="relative mx-auto flex min-h-[32rem] max-w-5xl items-center justify-center px-6 py-20 text-center sm:min-h-[38rem]" style={{ perspective: "1000px" }}>
         {/* Keyed on the slide id so React remounts this subtree on every
