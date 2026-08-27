@@ -30,7 +30,7 @@ export async function getPublishedCertifications() {
     },
   });
 
-  return rows.map((row) => ({
+  return rows.map((row: (typeof rows)[number]) => ({
     ...row,
     lapsed: Boolean(row.expiresAt && row.expiresAt < now),
   }));

@@ -25,7 +25,7 @@ export default async function DivisionsPage() {
     },
   });
 
-  const divisions: DivisionSummary[] = rows.map((r) => ({
+  const divisions: DivisionSummary[] = rows.map((r: (typeof rows)[number]) => ({
     id: r.id,
     slug: r.slug,
     title: r.title,

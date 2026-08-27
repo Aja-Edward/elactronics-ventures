@@ -18,7 +18,7 @@ export default async function Header() {
   // Accreditation marks sit in the masthead rather than at the foot of the
   // page: in this sector they are the single strongest trust signal, and a
   // buyer checking whether a contractor is certified should not have to hunt.
-  const certBadges = certifications.filter((c) => c.file && !c.lapsed).slice(0, 4);
+  const certBadges = certifications.filter((c: (typeof certifications)[number]) => c.file && !c.lapsed).slice(0, 4);
 
   return (
     <header className="sticky top-0 z-50">
@@ -99,7 +99,7 @@ export default async function Header() {
               aria-label="View our certifications"
               className="hidden items-center gap-6 lg:flex"
             >
-              {certBadges.map((cert) => (
+              {certBadges.map((cert: (typeof certBadges)[number]) => (
                 <span
                   key={cert.id}
                   className="relative h-[72px] w-[300px] shrink-0 xl:h-[88px] xl:w-[370px]"
@@ -166,7 +166,7 @@ export default async function Header() {
             aria-label="View our certifications"
             className="mx-auto flex max-w-6xl items-center gap-4 overflow-x-auto px-6 py-2"
           >
-            {certBadges.map((cert) => (
+            {certBadges.map((cert: (typeof certBadges)[number]) => (
               <span key={cert.id} className="relative h-12 w-[190px] shrink-0">
                 <Image
                   src={cert.file!.secureUrl}
