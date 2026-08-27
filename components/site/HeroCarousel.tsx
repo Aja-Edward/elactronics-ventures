@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 
 export type HeroSlideData = {
   id: string;
@@ -164,6 +171,39 @@ function TransitionOverlay({ slide, spec }: { slide: HeroSlideData; spec: Transi
   );
 }
 
+/* ─── prefers-reduced-motion ──────────────────────────────────────────────────
+   A media query is an external store, so it is read with useSyncExternalStore
+   rather than mirrored into state from an effect. Reading it in an effect works
+   but renders once with the wrong value before correcting itself, and trips
+   react-hooks/set-state-in-effect for exactly that reason.
+   ───────────────────────────────────────────────────────────────────────── */
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+// Created on first use rather than at module scope: this is a client component,
+// but the module is still evaluated during SSR, where `window` does not exist.
+let reducedMotionMedia: MediaQueryList | null = null;
+
+function getReducedMotionMedia(): MediaQueryList {
+  if (!reducedMotionMedia) {
+    reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+  }
+  return reducedMotionMedia;
+}
+
+function subscribeReducedMotion(onStoreChange: () => void): () => void {
+  const media = getReducedMotionMedia();
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
+}
+
+const getReducedMotionSnapshot = () => getReducedMotionMedia().matches;
+
+// The server cannot know the preference. Assuming motion is allowed matches the
+// markup the client produces for the common case, and hydration corrects the
+// rest — the carousel only reads this on the first advance, seconds later.
+const getReducedMotionServerSnapshot = () => false;
+
 /**
  * Rotating hero.
  *
@@ -177,13 +217,13 @@ function TransitionOverlay({ slide, spec }: { slide: HeroSlideData; spec: Transi
  *   - manual controls and dots are real buttons, reachable and labelled
  *   - the live region is polite, and announces only on manual change
  *
- * Only the first slide's image gets priority; the rest lazy-load, so a
- * five-slide hero does not cost five full-bleed images on first paint.
+ * Only the first slide's image is preloaded via `priority`; the rest load
+ * eagerly but unprioritised, so they do not compete with the LCP image while
+ * still being on hand before their slide is swapped in.
  */
 export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
   const [outgoing, setOutgoing] = useState<OutgoingState | null>(null);
   const regionRef = useRef<HTMLDivElement>(null);
   // `go` reads the live index without taking it as a dependency, so the
@@ -191,19 +231,12 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
   const indexRef = useRef(0);
   const runIdRef = useRef(0);
   const lastTransitionRef = useRef<string | null>(null);
-  const reducedMotionRef = useRef(false);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    reducedMotionRef.current = mq.matches;
-    const onChange = (e: MediaQueryListEvent) => {
-      setReducedMotion(e.matches);
-      reducedMotionRef.current = e.matches;
-    };
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot,
+  );
 
   const go = useCallback(
     (next: number) => {
@@ -213,7 +246,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
 
       // The incoming slide is swapped in underneath immediately; the departing
       // one is handed to the overlay to animate away over the top of it.
-      if (!reducedMotionRef.current) {
+      if (!reducedMotion) {
         const spec = pickTransition(lastTransitionRef.current);
         lastTransitionRef.current = spec.name;
         runIdRef.current += 1;
@@ -223,7 +256,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
       indexRef.current = newIndex;
       setIndex(newIndex);
     },
-    [slides],
+    [slides, reducedMotion],
   );
 
   useEffect(() => {
