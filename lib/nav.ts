@@ -5,10 +5,9 @@ import { getPublishedDivisions } from "./divisions";
 /**
  * Primary navigation.
  *
- * Mirrors the reference site's menu, with one deliberate difference: every
- * entry points at something that actually exists. Several of their About
- * children are standalone pages; here those are sections of /about, linked by
- * anchor. A menu full of 404s is worse than a shorter menu.
+ * Mirrors the reference site's menu, including its shape: each About child is
+ * a standalone page under /about, as it is on the reference site, rather than
+ * an anchor into one long page. Every entry points at a route that exists.
  *
  * Divisions are read from the database rather than hard-coded, so publishing
  * or unpublishing one updates the menu with no code change.
@@ -23,14 +22,14 @@ export async function getNavItems(): Promise<NavItem[]> {
       href: "/about",
       children: [
         { label: "Who We Are", href: "/about" },
-        { label: "Our Governance", href: "/about#governance" },
-        { label: "Our History", href: "/about#history" },
-        { label: "Group Entities", href: "/about#group-entities" },
-        { label: "Global Locations", href: "/about#locations" },
-        { label: "Awards & Recognitions", href: "/about#awards" },
+        { label: "Our Governance", href: "/about/governance" },
+        { label: "Our History", href: "/about/history" },
+        { label: "Group Entities", href: "/about/group-entities" },
+        { label: "Global Locations", href: "/about/locations" },
+        { label: "Awards & Recognitions", href: "/about/awards" },
         { label: "Our Certifications", href: "/certifications" },
-        { label: "Clients", href: "/about#clients" },
-        { label: "FAQs", href: "/about#faq" },
+        { label: "Clients", href: "/about/clients" },
+        { label: "FAQs", href: "/about/faqs" },
         { label: "News", href: "/news" },
         { label: "Contact Us", href: "/contact" },
       ],

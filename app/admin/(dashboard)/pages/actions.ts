@@ -87,8 +87,6 @@ export async function savePage(
 
   updateTag(tags.pages());
   updateTag(tags.page(d.slug));
-  // The About route composes several sources under its own tag.
-  if (d.slug === "about") updateTag("about-page");
   redirect("/admin/pages");
 }
 
@@ -118,7 +116,6 @@ export async function setPublished(id: string, publish: boolean): Promise<SaveSt
 
   updateTag(tags.pages());
   updateTag(tags.page(page.slug));
-  if (page.slug === "about") updateTag("about-page");
   return {};
 }
 
@@ -137,6 +134,5 @@ export async function deletePage(id: string): Promise<SaveState> {
 
   updateTag(tags.pages());
   updateTag(tags.page(page.slug));
-  if (page.slug === "about") updateTag("about-page");
   return {};
 }
