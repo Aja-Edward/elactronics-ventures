@@ -53,7 +53,10 @@ export default function MainNav({ items }: { items: NavItem[] }) {
     <nav
       ref={navRef}
       aria-label="Primary"
-      className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-6 py-1.5"
+      // Wraps rather than scrolls on narrow screens. It must not be a scroll
+      // container: `overflow-x: auto` forces the computed `overflow-y` to
+      // `auto` as well, which clipped the open dropdown to the 48px nav band.
+      className="mx-auto flex max-w-6xl flex-wrap items-center gap-1 px-6 py-1.5"
       onMouseLeave={() => setOpenIndex(null)}
     >
       {items.map((item, i) => {
