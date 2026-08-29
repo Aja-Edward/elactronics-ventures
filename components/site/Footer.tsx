@@ -149,8 +149,23 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-brand-900 pt-6 text-xs text-steel-400">
-          © {year} {site.companyName}. All rights reserved.
+        <div className="mt-12 flex flex-col gap-3 border-t border-brand-900 pt-6 text-xs text-steel-400 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            © {year} {site.companyName}. All rights reserved.
+          </p>
+          <p>
+            Developed by{" "}
+            <a
+              href="https://nuventcloud.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-brand-200 transition-colors hover:text-white"
+            >
+              nuventcloud.com
+            </a>
+            <span className="mx-2 text-brand-900">|</span>
+            Managed by <span className="font-medium text-brand-200">Gbestech</span>
+          </p>
         </div>
       </div>
     </footer>
