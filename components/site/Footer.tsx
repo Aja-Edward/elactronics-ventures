@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { tags } from "@/lib/cache-tags";
+import { getPublishedDivisions } from "@/lib/divisions";
 import { getSiteSettings, SITE_NAV, whatsappHref } from "@/lib/site";
 
 export default async function Footer() {
@@ -10,11 +11,18 @@ export default async function Footer() {
   // an unstable value that Next refuses to prerender, since it can differ
   // between renders. Inside a cache scope it is computed once and refreshed
   // with the entry, so the year rolls over within a day of 1 January.
+  //
+  // Tagged for divisions as well as settings, because the service list below
+  // is read from the database — publishing a division has to reach the footer
+  // on every page, not just the menu.
   "use cache";
-  cacheTag(tags.siteSettings());
+  cacheTag(tags.siteSettings(), tags.divisions());
   cacheLife("days");
 
-  const site = await getSiteSettings();
+  const [site, divisions] = await Promise.all([
+    getSiteSettings(),
+    getPublishedDivisions(),
+  ]);
   const wa = whatsappHref(site.whatsapp);
   const year = new Date().getFullYear();
 
@@ -25,7 +33,7 @@ export default async function Footer() {
   return (
     <footer className="mt-auto bg-brand-950 text-brand-200">
       <div className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.9fr_1.5fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
               {/* The mark is a full-colour PNG with no white variant, so it
@@ -68,6 +76,29 @@ export default async function Footer() {
               ))}
             </ul>
           </nav>
+
+          {/* Service divisions, as the reference site lists them. Read from
+              the database rather than hard-coded, so the footer, the menu and
+              /divisions can never disagree about what the company offers. */}
+          {divisions.length > 0 && (
+            <nav aria-label="Service divisions">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-steel-400">
+                Service Divisions
+              </h2>
+              <ul className="mt-4 space-y-2.5">
+                {divisions.map((division: (typeof divisions)[number]) => (
+                  <li key={division.slug}>
+                    <Link
+                      href={`/divisions/${division.slug}`}
+                      className="text-sm leading-snug text-brand-200 transition-colors hover:text-white"
+                    >
+                      {division.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
 
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-steel-400">
