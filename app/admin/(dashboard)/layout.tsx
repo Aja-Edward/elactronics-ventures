@@ -17,6 +17,9 @@ const ADMIN_NAV = [
   { label: "Dashboard", href: "/admin" },
   { label: "Hero", href: "/admin/hero" },
   { label: "Divisions", href: "/admin/divisions" },
+  // One link for the seven About entities; they share a hub at /admin/about
+  // rather than each claiming a slot in a header that is already full.
+  { label: "About", href: "/admin/about" },
   { label: "Equipment", href: "/admin/equipment" },
   { label: "Projects", href: "/admin/projects" },
   { label: "Certifications", href: "/admin/certifications" },
