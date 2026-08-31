@@ -6,28 +6,27 @@ import PostGrid from "@/components/site/PostGrid";
 import { getPublishedPosts } from "@/lib/news";
 
 export const metadata: Metadata = {
-  title: "Our News",
-  description: "Company news and project updates from Elatronics Ventures.",
-  alternates: { canonical: "/news" },
+  title: "Our Blog",
+  description:
+    "Longer-form technical writing and industry commentary from the Elatronics Ventures team.",
+  alternates: { canonical: "/blog" },
 };
 
-export default async function NewsIndexPage() {
-  // News only. Longer-form commentary is filed as BLOG and listed at /blog,
-  // as the reference site separates the two.
-  const posts = await getPublishedPosts("NEWS");
+export default async function BlogIndexPage() {
+  const posts = await getPublishedPosts("BLOG");
 
   return (
     <>
       <PageHero
-        title="Our News"
-        crumb="News"
-        intro="Company updates, project milestones and notes from the field."
+        title="Our Blog"
+        crumb="Blog"
+        intro="Technical notes, lessons from the field and commentary on the sectors we work in."
       />
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-6xl px-6">
           {posts.length === 0 ? (
-            <EmptyNotice>No news has been published yet.</EmptyNotice>
+            <EmptyNotice>Articles will be published here shortly.</EmptyNotice>
           ) : (
             <PostGrid posts={posts} />
           )}

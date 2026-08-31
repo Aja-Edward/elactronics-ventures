@@ -3,6 +3,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 
 import { db } from "../lib/db";
+import { SKID_GROUP } from "../lib/service-groups";
 
 /**
  * Idempotent seed — safe to re-run. Everything uses upsert keyed on a natural
@@ -136,6 +137,44 @@ const DIVISIONS: DivisionSeed[] = [
   },
 ];
 
+/**
+ * The skid-package systems. These hang off `Service.group` rather than a
+ * division: they are a manufacturing capability of their own and get a
+ * top-level menu entry, so there is no parent division to attach them to.
+ */
+type SkidSeed = { slug: string; title: string; summary: string; order: number };
+
+const SKID_SYSTEMS: SkidSeed[] = [
+  {
+    slug: "midstream-oil-gas-modular-process-systems",
+    title: "Midstream Oil & Gas Modular Process Systems",
+    summary:
+      "Skid-mounted separation, dehydration, compression and metering packages for gathering, processing and transmission duty.",
+    order: 1,
+  },
+  {
+    slug: "downstream-oil-gas-skid-mounted-modular-process-systems",
+    title: "Downstream Oil & Gas Skid-Mounted Modular Process Systems",
+    summary:
+      "Modular process packages for refining and product handling, including blending, transfer, filtration and custody transfer skids.",
+    order: 2,
+  },
+  {
+    slug: "power-generation-skid-mounted-modular-process-systems",
+    title: "Power Generation Skid-Mounted Modular Process Systems",
+    summary:
+      "Fuel conditioning, lube oil, cooling and auxiliary packages built to sit alongside gas turbine and reciprocating engine sets.",
+    order: 3,
+  },
+  {
+    slug: "water-generation",
+    title: "Water Generation",
+    summary:
+      "Desalination, potable water and water treatment packages for offshore installations, camps and industrial sites.",
+    order: 4,
+  },
+];
+
 async function seedSiteSettings() {
   const data = {
     companyName: "Elatronics Ventures",
@@ -183,6 +222,27 @@ async function seedDivisions() {
   console.log(`  divisions       ok (${DIVISIONS.length})`);
 }
 
+async function seedSkidSystems() {
+  for (const s of SKID_SYSTEMS) {
+    const data = {
+      title: s.title,
+      group: SKID_GROUP,
+      summary: s.summary,
+      order: s.order,
+      status: "PUBLISHED" as const,
+      publishedAt: new Date(),
+    };
+
+    await db.service.upsert({
+      where: { slug: s.slug },
+      create: { slug: s.slug, ...data },
+      update: data,
+    });
+  }
+
+  console.log(`  skid systems    ok (${SKID_SYSTEMS.length})`);
+}
+
 async function seedAdmin() {
   const email = process.env.ADMIN_EMAIL?.trim();
   const password = process.env.ADMIN_PASSWORD;
@@ -223,6 +283,7 @@ async function main() {
   console.log("seeding:");
   await seedSiteSettings();
   await seedDivisions();
+  await seedSkidSystems();
   await seedAdmin();
   console.log("done.");
 }

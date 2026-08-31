@@ -101,12 +101,23 @@ export function whatsappHref(number: string | null): string | null {
   return digits ? `https://wa.me/${digits}` : null;
 }
 
+/**
+ * The footer's "Company" column.
+ *
+ * Deliberately not the same list as the header menu: it carries the sections
+ * the header nav does not surface at top level — Projects and Certifications —
+ * so nothing on the site is reachable only through a dropdown.
+ */
 export const SITE_NAV = [
   { label: "About", href: "/about" },
   { label: "Divisions", href: "/divisions" },
-  { label: "Equipment", href: "/equipment" },
+  { label: "Skid Package Equipment", href: "/skid-package-equipment" },
+  { label: "Our Equipment", href: "/equipment" },
+  { label: "OEM Partners", href: "/oem" },
   { label: "Projects", href: "/projects" },
   { label: "Certifications", href: "/certifications" },
   { label: "News", href: "/news" },
+  { label: "Blog", href: "/blog" },
+  { label: "Events Gallery", href: "/gallery" },
   { label: "Contact", href: "/contact" },
 ] as const;

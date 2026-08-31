@@ -4,18 +4,23 @@ import { tags } from "./cache-tags";
 import { db } from "./db";
 
 /**
- * News and blog share one model, split by `type`. They are presented together
- * under /news: on a site this size, separating them would give two thin,
- * near-empty listings rather than one useful one.
+ * News and blog share one model, split by `type`.
+ *
+ * The two have separate listings — /news and /blog — because the reference
+ * site lists them separately and readers arrive looking for one or the other.
+ * They still share the article route at /news/[slug]: one model, one slug
+ * space, so a post keeps its URL if an editor reclassifies it.
  */
 
-export async function getPublishedPosts() {
+export type PostKind = "NEWS" | "BLOG";
+
+export async function getPublishedPosts(type?: PostKind) {
   "use cache";
   cacheTag(tags.posts());
   cacheLife("days");
 
   return db.post.findMany({
-    where: { status: "PUBLISHED" },
+    where: { status: "PUBLISHED", ...(type ? { type } : {}) },
     orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
     select: {
       id: true, slug: true, title: true, excerpt: true, type: true,

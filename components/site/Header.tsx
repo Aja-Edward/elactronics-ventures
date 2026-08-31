@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import LanguageSelect from "./LanguageSelect";
 import MainNav from "./MainNav";
+import MobileNav from "./MobileNav";
 import { getPublishedCertifications } from "@/lib/certifications";
 import { getNavItems } from "@/lib/nav";
 import { getSiteSettings, whatsappHref } from "@/lib/site";
@@ -142,19 +143,34 @@ export default async function Header() {
             </button>
           </form>
 
-          <Link
-            href="/request-quote"
-            className="shrink-0 rounded bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 md:hidden"
-          >
-            Quote
-          </Link>
+          {/* Below lg the menu band is hidden and the whole nav lives behind
+              this hamburger. The quote button stays alongside it down to md,
+              where the utility bar that also carries it disappears. */}
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/request-quote"
+              className="rounded bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 md:hidden"
+            >
+              Quote
+            </Link>
+            <MobileNav
+              items={navItems}
+              phone={site.phone}
+              email={site.email}
+              whatsapp={wa}
+            />
+          </div>
         </div>
       </div>
 
       {/* Primary navigation, on its own band beneath the masthead. The nav
           itself is a Client Component because the dropdowns need state; the
-          items are resolved on the server so divisions come from the database. */}
-      <div className="relative border-b border-brand-100 bg-white">
+          items are resolved on the server so divisions come from the database.
+
+          Hidden below lg: nine top-level items do not fit a tablet-width band
+          without wrapping into three rows, and the dropdowns need hover. That
+          width gets MobileNav instead. */}
+      <div className="relative hidden border-b border-brand-100 bg-white lg:block">
         <MainNav items={navItems} />
       </div>
 
