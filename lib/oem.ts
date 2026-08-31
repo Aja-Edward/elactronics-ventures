@@ -22,6 +22,7 @@ export async function getOemPartners() {
       id: true,
       name: true,
       description: true,
+      country: true,
       website: true,
       authorisationRef: true,
       authorisedUntil: true,

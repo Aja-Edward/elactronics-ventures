@@ -31,7 +31,14 @@ const FIELDS: Field[] = [
     full: true,
     placeholder: "e.g. Air and gas compressor packages, dryers and nitrogen generators.",
   },
-  { kind: "url", name: "website", label: "Website", full: true, placeholder: "https://…" },
+  {
+    kind: "text",
+    name: "country",
+    label: "Based in",
+    placeholder: "e.g. Netherlands",
+    hint: "Shown under the manufacturer name on the public page.",
+  },
+  { kind: "url", name: "website", label: "Website", placeholder: "https://…" },
   {
     kind: "text",
     name: "authorisationRef",
@@ -62,6 +69,7 @@ const SIDE_FIELDS: Field[] = [
 const BLANK: FieldValues = {
   name: "",
   description: "",
+  country: "",
   website: "",
   authorisationRef: "",
   authorisedFrom: "",
@@ -85,6 +93,7 @@ export default async function EditOemPartnerPage({
             id: true,
             name: true,
             description: true,
+            country: true,
             website: true,
             authorisationRef: true,
             authorisedFrom: true,
@@ -102,6 +111,7 @@ export default async function EditOemPartnerPage({
     ? {
         name: row.name,
         description: row.description ?? "",
+        country: row.country ?? "",
         website: row.website ?? "",
         authorisationRef: row.authorisationRef ?? "",
         authorisedFrom: toDateInput(row.authorisedFrom),

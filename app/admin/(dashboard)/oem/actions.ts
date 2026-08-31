@@ -17,6 +17,7 @@ const Schema = z
   .object({
     name: z.string().trim().min(2, "Name is required."),
     description: z.string().trim().max(800).optional().or(z.literal("")),
+    country: z.string().trim().max(80).optional().or(z.literal("")),
     website: z.string().trim().max(300).optional().or(z.literal("")),
     authorisationRef: z.string().trim().max(120).optional().or(z.literal("")),
     authorisedFrom: z.string().trim().optional().or(z.literal("")),
@@ -42,6 +43,7 @@ function toData(v: Values) {
   return {
     name: v.name,
     description: v.description || null,
+    country: v.country || null,
     website: v.website || null,
     authorisationRef: v.authorisationRef || null,
     authorisedFrom: toDate(v.authorisedFrom),

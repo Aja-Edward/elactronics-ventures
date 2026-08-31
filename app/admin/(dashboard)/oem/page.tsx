@@ -14,6 +14,7 @@ export const metadata: Metadata = { title: "OEM partners" };
 type Row = {
   id: string;
   name: string;
+  country: string | null;
   authorisationRef: string | null;
   authorisedUntil: Date | null;
   status: string;
@@ -30,6 +31,7 @@ export default async function OemAdminPage() {
     select: {
       id: true,
       name: true,
+      country: true,
       authorisationRef: true,
       authorisedUntil: true,
       status: true,
@@ -53,8 +55,10 @@ export default async function OemAdminPage() {
           >
             {row.name}
           </Link>
-          <p className="mt-0.5 font-mono text-[11px] text-steel-500">
-            {row.authorisationRef ?? "no reference"}
+          <p className="mt-0.5 text-[11px] text-steel-500">
+            {[row.country, row.authorisationRef ?? "no reference"]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
         </div>
       ),

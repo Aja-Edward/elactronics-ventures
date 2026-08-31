@@ -62,6 +62,12 @@ export default async function OemPage() {
                       {partner.name}
                     </h2>
 
+                    {partner.country && (
+                      <p className="mt-1 text-xs uppercase tracking-wide text-steel-500">
+                        {partner.country}
+                      </p>
+                    )}
+
                     {partner.description && (
                       <p className="mt-2 flex-1 text-sm leading-relaxed text-steel-700">
                         {partner.description}

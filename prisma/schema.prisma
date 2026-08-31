@@ -497,6 +497,8 @@ model OemPartner {
   logoId           String?
   website          String?
   description      String?
+  /// Where the manufacturer is based. Buyers use it to judge lead times.
+  country          String?
   authorisationRef String?
   authorisedFrom   DateTime?
   authorisedUntil  DateTime?
