@@ -156,12 +156,12 @@ export default async function Footer() {
           <p>
             Developed by{" "}
             <a
-              href="https://nuventcloud.com"
+              href="https://nuventacloud.com"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-brand-200 transition-colors hover:text-white"
             >
-              nuventcloud.com
+              nuventacloud.com
             </a>
             <span className="mx-2 text-brand-900">|</span>
             Managed by <span className="font-medium text-brand-200">Gbestech</span>
