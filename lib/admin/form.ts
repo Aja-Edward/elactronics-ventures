@@ -16,3 +16,18 @@ export function slugify(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * The same transform, but safe to run on every keystroke.
+ *
+ * `slugify` strips trailing hyphens, which makes a hyphenated slug impossible
+ * to type by hand: the moment you press "-", it is removed, and the next
+ * character joins the previous word. So while the field has focus a trailing
+ * hyphen is kept, and `slugify` is applied on blur to tidy it up.
+ */
+export function slugifyWhileTyping(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+/, "");
+}

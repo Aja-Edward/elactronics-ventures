@@ -20,10 +20,13 @@ const ADMIN_NAV = [
   // One link for the seven About entities; they share a hub at /admin/about
   // rather than each claiming a slot in a header that is already full.
   { label: "About", href: "/admin/about" },
+  { label: "Skid Systems", href: "/admin/skid-package-equipment" },
   { label: "Equipment", href: "/admin/equipment" },
+  { label: "OEM", href: "/admin/oem" },
   { label: "Projects", href: "/admin/projects" },
   { label: "Certifications", href: "/admin/certifications" },
   { label: "News", href: "/admin/news" },
+  { label: "Gallery", href: "/admin/gallery" },
   { label: "Pages", href: "/admin/pages" },
   { label: "Media", href: "/admin/media" },
   { label: "Settings", href: "/admin/settings" },
@@ -48,7 +51,10 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             >
               Elatronics CMS
             </Link>
-            <nav className="hidden items-center gap-6 md:flex">
+            {/* Wraps rather than overflowing: the list has grown past what
+                one row holds at md, and a nav that scrolls sideways is a nav
+                whose last few items are never found. */}
+            <nav className="hidden flex-wrap items-center gap-x-5 gap-y-1 md:flex">
               {ADMIN_NAV.map((item) => (
                 <Link
                   key={item.href}

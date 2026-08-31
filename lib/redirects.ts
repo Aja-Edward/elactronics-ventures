@@ -35,7 +35,7 @@ export async function findRedirect(source: string) {
 export async function recordSlugChange(from: string, to: string) {
   if (from === to) return;
 
-  await db.$transaction(async (tx: any) => {
+  await db.$transaction(async (tx) => {
     // Renaming back to a previously used slug would otherwise leave a row
     // redirecting the new location to itself.
     await tx.redirect.deleteMany({ where: { source: to } });

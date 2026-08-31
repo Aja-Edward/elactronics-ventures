@@ -160,6 +160,23 @@ export async function removeResource(opts: {
   return {};
 }
 
+/**
+ * `<input type="date">` posts "" or "YYYY-MM-DD"; Prisma wants null or a Date.
+ * Parsed as UTC midnight rather than through the bare `new Date(value)` local
+ * parse, so an event dated the 1st does not display as the 31st for an editor
+ * west of Greenwich.
+ */
+export function toDate(value: string | undefined | null): Date | null {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** The inverse: a stored Date back into the value a date input expects. */
+export function toDateInput(value: Date | null | undefined): string {
+  return value ? value.toISOString().slice(0, 10) : "";
+}
+
 /** Images offered by the media picker on every resource form. */
 export async function getMediaOptions() {
   return db.media.findMany({

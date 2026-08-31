@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 
 import MediaPicker, { type MediaOption } from "./MediaPicker";
-import { slugify, type SaveState } from "@/lib/admin/form";
+import { slugify, slugifyWhileTyping, type SaveState } from "@/lib/admin/form";
 
 /**
  * Form for a simple admin record, built from a field list.
@@ -19,7 +19,7 @@ import { slugify, type SaveState } from "@/lib/admin/form";
 
 export type Field =
   | {
-      kind: "text" | "url" | "email";
+      kind: "text" | "url" | "email" | "date";
       name: string;
       label: string;
       required?: boolean;
@@ -79,6 +79,7 @@ export default function ResourceForm({
   sideFields = [],
   media,
   slug,
+  extra,
   cancelHref,
 }: {
   action: (prev: SaveState, formData: FormData) => Promise<SaveState>;
@@ -88,6 +89,12 @@ export default function ResourceForm({
   media?: { name: string; label: string; options: MediaOption[] };
   /** Derives a URL slug from another field until the slug is edited by hand. */
   slug?: { source: string; name: string };
+  /**
+   * A bespoke control posted with the rest of the form — the gallery's image
+   * picker, for one. It sits full width below the field grid, because the
+   * things that need it are wider than the side column.
+   */
+  extra?: ReactNode;
   cancelHref: string;
 }) {
   const [state, formAction] = useActionState<SaveState, FormData>(action, {});
@@ -168,8 +175,10 @@ export default function ResourceForm({
             value={slugValue}
             onChange={(e) => {
               setSlugLocked(true);
-              setSlugValue(slugify(e.target.value));
+              setSlugValue(slugifyWhileTyping(e.target.value));
             }}
+            // Tidies the trailing hyphen that typing is allowed to leave.
+            onBlur={(e) => setSlugValue(slugify(e.target.value))}
             required={field.required}
             placeholder={field.placeholder}
             className={`${input} font-mono`}
@@ -233,6 +242,8 @@ export default function ResourceForm({
           )}
         </div>
       </div>
+
+      {extra}
 
       <div className="flex items-center gap-3">
         <Save />
