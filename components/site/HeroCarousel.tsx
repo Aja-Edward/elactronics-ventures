@@ -352,7 +352,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlideData[] }) {
             mask is what turns a slide into a wipe. */}
         <div aria-live="polite" aria-atomic="true" className="w-full hero-slide-content" key={active.id}>
           <div className="overflow-hidden pb-1">
-            <h1 className="hero-anim-title hero-text-shadow text-balance font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="hero-anim-title hero-text-shadow text-balance font-display text-5xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
               {active.title}
             </h1>
           </div>
