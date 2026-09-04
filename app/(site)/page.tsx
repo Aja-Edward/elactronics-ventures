@@ -7,6 +7,8 @@ import HeroCarousel from "@/components/site/HeroCarousel";
 import WelcomeHero from "@/components/site/WelcomeHero";
 import { getPublishedCertifications } from "@/lib/certifications";
 import { getPublishedHeroSlides } from "@/lib/hero";
+import { formatPostDate, getPublishedPosts } from "@/lib/news";
+import { getOemPartners } from "@/lib/oem";
 import { getPublishedProjects } from "@/lib/projects";
 import { db } from "@/lib/db";
 import { getSiteSettings } from "@/lib/site";
@@ -56,20 +58,35 @@ async function getFeaturedDivisions() {
 }
 
 export default async function Home() {
-  const [site, divisions, certifications, heroSlides, allProjects] =
-    await Promise.all([
-      getSiteSettings(),
-      getFeaturedDivisions(),
-      getPublishedCertifications(),
-      getPublishedHeroSlides(),
-      getPublishedProjects(),
-    ]);
+  const [
+    site,
+    divisions,
+    certifications,
+    heroSlides,
+    allProjects,
+    allNews,
+    oemPartners,
+  ] = await Promise.all([
+    getSiteSettings(),
+    getFeaturedDivisions(),
+    getPublishedCertifications(),
+    getPublishedHeroSlides(),
+    getPublishedProjects(),
+    getPublishedPosts("NEWS"),
+    getOemPartners(),
+  ]);
 
   // getPublishedProjects already sorts featured first, then newest year — so
   // the first four are the "latest". Sliced here rather than with a take() in
   // a bespoke query, so this shares the /projects cache entry instead of
   // adding a second one that has to be invalidated alongside it.
   const projects = allProjects.slice(0, 4);
+
+  // Same reasoning for news: getPublishedPosts already sorts featured first,
+  // then newest published, so the homepage takes the top three off the shared
+  // /news cache entry rather than running a second, separately-invalidated
+  // query.
+  const posts = allNews.slice(0, 3);
 
   return (
     <>
@@ -279,6 +296,132 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Latest news. Same empty-state reasoning as the sections around it:
+          a news band with nothing in it says the site is unmaintained. */}
+      {posts.length > 0 && (
+        <section className="border-t border-brand-100 bg-white py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <h2 className="font-display text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
+                  Latest News
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-steel-700">
+                  Updates from across our divisions and the wider industry.
+                </p>
+                <div aria-hidden className="mt-6 h-1 w-12 bg-accent-600" />
+              </div>
+              <Link
+                href="/news"
+                className="text-xs font-semibold text-brand-900 hover:text-accent-600"
+              >
+                View all news
+              </Link>
+            </div>
+
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/news/${post.slug}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-sm border border-brand-100 bg-white transition-colors hover:border-brand-300"
+                >
+                  <div className="relative aspect-[5/3] bg-surface">
+                    {post.heroImage ? (
+                      <Image
+                        src={post.heroImage.secureUrl}
+                        alt={post.heroImage.alt || post.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-steel-400">
+                        News
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2 p-5">
+                    <h3 className="text-sm font-semibold leading-snug text-brand-900 group-hover:text-accent-600">
+                      {post.title}
+                    </h3>
+                    {formatPostDate(post.publishedAt) && (
+                      <p className="text-xs text-steel-400">
+                        {formatPostDate(post.publishedAt)}
+                      </p>
+                    )}
+                    <span className="mt-auto pt-2 text-xs font-semibold text-accent-600">
+                      Read more
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Partnerships and OEM authorisations.
+          A logo wall, so object-contain on a padded tile rather than cover:
+          these arrive as wordmarks of wildly different proportions, and
+          cropping a manufacturer's logo to fill a box is the one thing an
+          authorised distributor must not do. Certifications are deliberately
+          not repeated here — they have their own strip below. */}
+      {oemPartners.length > 0 && (
+        <section className="border-t border-brand-100 bg-surface py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <h2 className="font-display text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
+                  Our Partnership, Authorizations and OEM Agency
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-steel-700">
+                  We hold authorisations and agency agreements with original
+                  equipment manufacturers, so equipment and spares are supplied
+                  to specification and backed by the maker.
+                </p>
+                <div aria-hidden className="mt-6 h-1 w-12 bg-accent-600" />
+              </div>
+              <Link
+                href="/oem"
+                className="text-xs font-semibold text-brand-900 hover:text-accent-600"
+              >
+                View all partners
+              </Link>
+            </div>
+
+            <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+              {oemPartners.map((partner) => (
+                <li key={partner.id}>
+                  <div
+                    className="flex h-24 items-center justify-center rounded-sm border border-brand-100 bg-white px-4"
+                    title={partner.name}
+                  >
+                    {partner.logo ? (
+                      <span className="relative h-full w-full">
+                        <Image
+                          src={partner.logo.secureUrl}
+                          alt={partner.logo.alt || partner.name}
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                          className="object-contain p-2"
+                        />
+                      </span>
+                    ) : (
+                      // Named rather than blank: a partner without a logo yet
+                      // is still a credential worth showing.
+                      <span className="text-center text-xs font-semibold leading-tight text-steel-700">
+                        {partner.name}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
