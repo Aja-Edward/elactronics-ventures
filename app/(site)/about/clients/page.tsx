@@ -19,6 +19,7 @@ export default async function ClientsPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-clients"
         title="Clients"
         trail={ABOUT_TRAIL}
         intro="The operators and contractors we deliver for."

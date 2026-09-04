@@ -25,6 +25,7 @@ export default async function OemPage() {
   return (
     <>
       <PageHero
+        pageSlug="oem"
         title="Our Partnerships and Authorisations"
         crumb="OEM"
         intro="The manufacturers we are authorised to represent, supply and support across West Africa."

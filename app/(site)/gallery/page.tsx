@@ -21,6 +21,7 @@ export default async function GalleryPage() {
   return (
     <>
       <PageHero
+        pageSlug="gallery"
         title="Events Gallery"
         trail={ABOUT_TRAIL}
         intro="Photography from our events, site visits and project milestones."

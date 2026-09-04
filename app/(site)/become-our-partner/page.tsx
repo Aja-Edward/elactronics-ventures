@@ -18,6 +18,7 @@ export default async function BecomeOurPartnerPage() {
   return (
     <>
       <PageHero
+        pageSlug="become-our-partner"
         title="Become our Partner"
         intro="We work with manufacturers, distributors and specialist subcontractors who want representation in this market."
       />

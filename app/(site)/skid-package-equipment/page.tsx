@@ -25,6 +25,7 @@ export default async function SkidPackageEquipmentPage() {
   return (
     <>
       <PageHero
+        pageSlug="skid-package-equipment"
         title="Skid Package Equipment"
         intro="Custom engineered, skid-mounted modular process systems — designed, built, tested and delivered as a single package."
       />

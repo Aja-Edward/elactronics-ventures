@@ -19,6 +19,7 @@ export default async function NewsIndexPage() {
   return (
     <>
       <PageHero
+        pageSlug="news"
         title="Our News"
         crumb="News"
         intro="Company updates, project milestones and notes from the field."

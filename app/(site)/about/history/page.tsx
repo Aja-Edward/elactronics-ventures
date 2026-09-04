@@ -18,6 +18,7 @@ export default async function HistoryPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-history"
         title="Our History"
         trail={ABOUT_TRAIL}
         intro="How the business grew into the divisions and capabilities it operates today."

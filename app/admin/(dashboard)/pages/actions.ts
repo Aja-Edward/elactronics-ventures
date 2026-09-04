@@ -15,7 +15,30 @@ const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  * with no matching route would produce content nobody can reach, so new pages
  * are restricted to the ones that exist.
  */
-export const ROUTED_SLUGS = ["about"] as const;
+/**
+ * Slugs a route actually renders. The guard below refuses anything else,
+ * because a Page row whose slug no route reads is invisible content an editor
+ * has no way to discover is doing nothing.
+ *
+ * Nested routes are hyphenated: the slug pattern allows no slashes, so
+ * /about/awards is reached as "about-awards".
+ */
+export const ROUTED_SLUGS = [
+  "about",
+  "about-awards",
+  "about-clients",
+  "about-faqs",
+  "about-governance",
+  "about-group-entities",
+  "about-history",
+  "about-locations",
+  "become-our-partner",
+  "blog",
+  "gallery",
+  "news",
+  "oem",
+  "skid-package-equipment",
+] as const;
 
 const PageSchema = z.object({
   title: z.string().trim().min(2, "A title is required.").max(140),
@@ -24,6 +47,9 @@ const PageSchema = z.object({
   body: z.string().trim().max(30000).optional().or(z.literal("")),
   seoTitle: z.string().trim().max(70).optional().or(z.literal("")),
   seoDescription: z.string().trim().max(180).optional().or(z.literal("")),
+  // Empty string means "no banner" — the select renders a None option, and a
+  // cleared picker must be able to remove an image, not just fail to set one.
+  heroImageId: z.string().trim().optional().or(z.literal("")),
 });
 
 export type SaveState = { error?: string; fieldErrors?: Record<string, string> };
@@ -72,6 +98,7 @@ export async function savePage(
     body: d.body || null,
     seoTitle: d.seoTitle || null,
     seoDescription: d.seoDescription || null,
+    heroImageId: d.heroImageId || null,
   };
 
   if (id) {

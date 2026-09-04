@@ -18,6 +18,7 @@ export default async function GroupEntitiesPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-group-entities"
         title="Group Entities"
         trail={ABOUT_TRAIL}
         intro="The companies that make up the group, and the capability each one brings."

@@ -18,6 +18,7 @@ export default async function BlogIndexPage() {
   return (
     <>
       <PageHero
+        pageSlug="blog"
         title="Our Blog"
         crumb="Blog"
         intro="Technical notes, lessons from the field and commentary on the sectors we work in."

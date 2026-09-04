@@ -18,6 +18,7 @@ export default async function LocationsPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-locations"
         title="Global Locations"
         trail={ABOUT_TRAIL}
         intro="The offices and operating bases we work from."

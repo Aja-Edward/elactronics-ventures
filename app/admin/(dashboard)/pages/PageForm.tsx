@@ -1,13 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { savePage, ROUTED_SLUGS, type SaveState } from "./actions";
 
+/** Same shape the divisions picker uses, so the two stay interchangeable. */
+export type MediaOption = {
+  id: string;
+  secureUrl: string;
+  alt: string | null;
+  publicId: string;
+};
+
 export type PageValues = {
   id: string | null;
+  heroImageId: string | null;
   title: string;
   slug: string;
   description: string;
@@ -33,11 +43,18 @@ function Save() {
   );
 }
 
-export default function PageForm({ values }: { values: PageValues }) {
+export default function PageForm({
+  values,
+  media,
+}: {
+  values: PageValues;
+  media: MediaOption[];
+}) {
   const save = savePage.bind(null, values.id);
   const [state, formAction] = useActionState<SaveState, FormData>(save, {});
   const err = (k: string) => state.fieldErrors?.[k];
   const creating = !values.id;
+  const [heroImageId, setHeroImageId] = useState(values.heroImageId ?? "");
 
   return (
     <form action={formAction} className="space-y-6">
@@ -167,6 +184,56 @@ export default function PageForm({ values }: { values: PageValues }) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-brand-100 bg-white p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-steel-600">
+          Banner image
+        </p>
+        <p className="text-xs text-steel-500">
+          Shown behind the title in the dark band at the top of this page. Leave
+          as None for a plain band.
+        </p>
+        <input type="hidden" name="heroImageId" value={heroImageId} />
+
+        {media.length === 0 ? (
+          <p className="text-sm text-steel-700">
+            No media yet.{" "}
+            <Link href="/admin/media" className="font-semibold text-brand-900 underline">
+              Upload some first
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="grid max-h-72 grid-cols-3 gap-2 overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setHeroImageId("")}
+              className={`flex aspect-square items-center justify-center rounded border text-[11px] font-semibold ${
+                heroImageId === ""
+                  ? "border-brand-900 bg-brand-50 text-brand-900"
+                  : "border-brand-200 text-steel-600 hover:border-brand-300"
+              }`}
+            >
+              None
+            </button>
+            {media.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setHeroImageId(m.id)}
+                title={m.publicId}
+                className={`relative aspect-square overflow-hidden rounded border ${
+                  heroImageId === m.id
+                    ? "border-brand-900 ring-2 ring-brand-900/25"
+                    : "border-brand-200 hover:border-brand-300"
+                }`}
+              >
+                <Image src={m.secureUrl} alt={m.alt ?? ""} fill sizes="120px" className="object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

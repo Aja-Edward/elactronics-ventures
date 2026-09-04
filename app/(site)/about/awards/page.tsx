@@ -18,6 +18,7 @@ export default async function AwardsPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-awards"
         title="Awards & Recognitions"
         trail={ABOUT_TRAIL}
         intro="Recognition from clients, partners and industry bodies for the work we deliver."

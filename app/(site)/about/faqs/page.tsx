@@ -27,6 +27,7 @@ export default async function FaqsPage() {
   return (
     <>
       <PageHero
+        pageSlug="about-faqs"
         title="Frequently Asked Questions"
         crumb="FAQs"
         trail={ABOUT_TRAIL}

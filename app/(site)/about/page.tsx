@@ -78,6 +78,7 @@ export default async function AboutPage() {
   return (
     <>
       <PageHero
+        pageSlug="about"
         title={page?.title ?? "About Us"}
         crumb="About Us"
         intro={page?.description ?? undefined}

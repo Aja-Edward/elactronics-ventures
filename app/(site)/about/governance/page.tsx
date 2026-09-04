@@ -29,6 +29,7 @@ export default async function GovernancePage() {
   return (
     <>
       <PageHero
+        pageSlug="about-governance"
         title="Our Governance"
         trail={ABOUT_TRAIL}
         intro="The people accountable for our standards, our safety record and the commitments we make to clients."
