@@ -1,6 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export type Crumb = { label: string; href: string };
+
+/** A Media record, in the shape the page queries already select it. */
+export type HeroImage = { secureUrl: string; alt?: string | null };
 
 /**
  * The dark breadcrumb band every inner page opens with.
@@ -18,15 +22,43 @@ export default function PageHero({
   crumb,
   intro,
   trail = [],
+  image,
 }: {
   title: string;
   /** Breadcrumb label, when the full page title is too long for the trail. */
   crumb?: string;
   intro?: string;
   trail?: Crumb[];
+  /**
+   * Optional background photo. Omit it and the band renders exactly as it
+   * always has — every page that does not pass one is untouched.
+   */
+  image?: HeroImage | null;
 }) {
   return (
-    <section className="bg-brand-950">
+    <section className="relative isolate overflow-hidden bg-brand-950">
+      {image && (
+        <>
+          {/* Empty alt: this is decoration behind the heading, and the <h1>
+              below already names the page. Announcing the photo as well would
+              just make a screen reader read the page title twice. */}
+          <Image
+            src={image.secureUrl}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="-z-10 object-cover"
+          />
+          {/* Contrast floor. The band's text is white because brand-950
+              guarantees it; over an arbitrary photo that guarantee is gone,
+              and a pale sky behind the breadcrumb would make it unreadable.
+              The section keeps bg-brand-950 underneath, so a slow or failed
+              image load still leaves readable text rather than a flash of
+              white-on-white. */}
+          <div aria-hidden className="absolute inset-0 -z-10 bg-brand-950/75" />
+        </>
+      )}
       <div className="mx-auto max-w-6xl px-6 py-16">
         <nav aria-label="Breadcrumb" className="text-xs text-steel-300">
           <Link href="/" className="hover:text-white">
