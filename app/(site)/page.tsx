@@ -11,6 +11,20 @@ import { db } from "@/lib/db";
 import { getSiteSettings } from "@/lib/site";
 
 /**
+ * Shown in a division card's image slot when it has no hero image yet. The
+ * raw enum values are not presentable, and repeating the title there would
+ * just print it twice on the same card.
+ */
+const DIVISION_CATEGORY_LABELS: Record<
+  "EPCIM" | "SERVICE_OFFERING" | "PROCUREMENT",
+  string
+> = {
+  EPCIM: "EPCIM",
+  SERVICE_OFFERING: "Service",
+  PROCUREMENT: "Procurement",
+};
+
+/**
  * Reads divisions straight from the database in a Server Component - no
  * fetch back into our own /api. Cached under the "divisions" tag, so
  * publishing a division invalidates this without a rebuild.
@@ -24,8 +38,16 @@ async function getFeaturedDivisions() {
     return await db.division.findMany({
       where: { status: "PUBLISHED" },
       orderBy: [{ order: "asc" }, { title: "asc" }],
-      take: 6,
-      select: { id: true, slug: true, title: true, summary: true },
+      // No cap: this is the full service overview, not a teaser. Every
+      // published division belongs here, and a silent take() would drop
+      // whichever ones sort last as the list grows.
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        category: true,
+        heroImage: { select: { secureUrl: true, alt: true } },
+      },
     });
   } catch {
     return [];
@@ -99,31 +121,72 @@ export default async function Home() {
       {/* Divisions */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-6">
+          {/* Heading, standfirst, rule — the eyebrow that used to sit above
+              the heading is gone, so the block reads in the same three beats
+              as the rest of the section. Wording follows the positioning
+              already set in WelcomeHero above rather than introducing a
+              second, competing description of the company. */}
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-600">
-              What we do
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
               Capabilities across the project lifecycle
             </h2>
+            <p className="mt-4 text-base leading-relaxed text-steel-700">
+              Elatronics Ventures provides professional and innovative services
+              to the upstream and downstream oil and gas sectors — spanning
+              procurement, construction and installation, inspection,
+              maintenance and asset integrity.
+            </p>
+            <div aria-hidden className="mt-6 h-1 w-12 bg-accent-600" />
           </div>
 
           {divisions.length > 0 ? (
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {divisions.map((division) => (
                 <Link
                   key={division.id}
                   href={`/divisions/${division.slug}`}
-                  className="group rounded-lg border border-brand-100 bg-surface p-6 transition-colors hover:border-brand-300"
+                  className="group flex min-h-[88px] items-stretch overflow-hidden rounded-sm border border-brand-100 bg-white transition-colors hover:border-brand-300"
                 >
-                  <h3 className="font-display text-lg font-semibold text-brand-900 group-hover:text-accent-600">
-                    {division.title}
-                  </h3>
-                  {division.summary && (
-                    <p className="mt-2 text-sm leading-relaxed text-steel-700">
-                      {division.summary}
-                    </p>
-                  )}
+                  {/* Fixed-width strip down the left, stretched to whatever
+                      height the title needs. Filled or not: only some
+                      divisions will have an image, and a row where imaged
+                      cards are a different size to un-imaged ones reads as
+                      broken rather than half-finished. */}
+                  <div className="relative w-24 shrink-0 self-stretch bg-surface">
+                    {division.heroImage ? (
+                      <Image
+                        src={division.heroImage.secureUrl}
+                        alt={division.heroImage.alt || division.title}
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center px-1 text-center text-[10px] font-semibold uppercase leading-tight tracking-wide text-steel-400">
+                        {DIVISION_CATEGORY_LABELS[division.category]}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-4 py-3">
+                    <h3 className="text-sm leading-snug text-brand-900 group-hover:text-accent-600">
+                      {division.title}
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent-600">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                        aria-hidden
+                      >
+                        <path d="M2 8h11M9 4l4 4-4 4" />
+                      </svg>
+                      Read More
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
