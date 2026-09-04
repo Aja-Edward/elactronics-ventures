@@ -4,6 +4,7 @@ import EmptyNotice from "@/components/site/EmptyNotice";
 import PageHero from "@/components/site/PageHero";
 import PostGrid from "@/components/site/PostGrid";
 import { getPublishedPosts } from "@/lib/news";
+import { getPageBySlug } from "@/lib/pages";
 
 export const metadata: Metadata = {
   title: "Our News",
@@ -14,15 +15,27 @@ export const metadata: Metadata = {
 export default async function NewsIndexPage() {
   // News only. Longer-form commentary is filed as BLOG and listed at /blog,
   // as the reference site separates the two.
-  const posts = await getPublishedPosts("NEWS");
+  const [posts, page] = await Promise.all([
+    getPublishedPosts("NEWS"),
+    getPageBySlug("news"),
+  ]);
 
   return (
     <>
+      {/* Heading, standfirst and banner all come from the Page row with slug
+          "news", so they are editable without a deploy. The literals below are
+          the fallback for no row, an unpublished one, or a field left blank —
+          the page must never render a missing heading. */}
       <PageHero
-        pageSlug="news"
-        title="Our News"
+        title={page?.title ?? "Our News"}
         crumb="News"
-        intro="Company updates, project milestones and notes from the field."
+        intro={
+          page?.description ??
+          "Company updates, project milestones and notes from the field."
+        }
+        // The row is already loaded here, so hand the banner over directly
+        // rather than have PageHero query the same Page a second time.
+        image={page?.heroImage}
       />
 
       <section className="bg-white py-16">

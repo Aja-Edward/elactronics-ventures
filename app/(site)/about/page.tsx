@@ -78,7 +78,9 @@ export default async function AboutPage() {
   return (
     <>
       <PageHero
-        pageSlug="about"
+        // Loaded above, so pass the banner rather than making PageHero fetch
+        // the same Page row again.
+        image={page?.heroImage}
         title={page?.title ?? "About Us"}
         crumb="About Us"
         intro={page?.description ?? undefined}
