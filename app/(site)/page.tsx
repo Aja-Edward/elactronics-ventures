@@ -7,6 +7,7 @@ import HeroCarousel from "@/components/site/HeroCarousel";
 import WelcomeHero from "@/components/site/WelcomeHero";
 import { getPublishedCertifications } from "@/lib/certifications";
 import { getPublishedHeroSlides } from "@/lib/hero";
+import { getPublishedProjects } from "@/lib/projects";
 import { db } from "@/lib/db";
 import { getSiteSettings } from "@/lib/site";
 
@@ -55,12 +56,20 @@ async function getFeaturedDivisions() {
 }
 
 export default async function Home() {
-  const [site, divisions, certifications, heroSlides] = await Promise.all([
-    getSiteSettings(),
-    getFeaturedDivisions(),
-    getPublishedCertifications(),
-    getPublishedHeroSlides(),
-  ]);
+  const [site, divisions, certifications, heroSlides, allProjects] =
+    await Promise.all([
+      getSiteSettings(),
+      getFeaturedDivisions(),
+      getPublishedCertifications(),
+      getPublishedHeroSlides(),
+      getPublishedProjects(),
+    ]);
+
+  // getPublishedProjects already sorts featured first, then newest year — so
+  // the first four are the "latest". Sliced here rather than with a take() in
+  // a bespoke query, so this shares the /projects cache entry instead of
+  // adding a second one that has to be invalidated alongside it.
+  const projects = allProjects.slice(0, 4);
 
   return (
     <>
@@ -202,6 +211,77 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* Latest projects.
+          Hidden entirely when nothing is published rather than showing an
+          empty shell: on an engineering site, a past-performance section with
+          no entries in it reads worse than not claiming one at all — the same
+          reasoning as the accreditation strip below. */}
+      {projects.length > 0 && (
+        <section className="border-t border-brand-100 bg-surface py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="max-w-2xl">
+              <h2 className="font-display text-3xl font-bold tracking-tight text-brand-900 sm:text-4xl">
+                Latest Projects
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-steel-700">
+                Recent work delivered for operators and contractors across the
+                Nigerian oil and gas industry.
+              </p>
+              <div aria-hidden className="mt-6 h-1 w-12 bg-accent-600" />
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {projects.map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.slug}`}
+                  className="group flex flex-col overflow-hidden rounded-sm border border-brand-100 bg-white transition-colors hover:border-brand-300"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-surface">
+                    {project.heroImage ? (
+                      <Image
+                        src={project.heroImage.secureUrl}
+                        alt={project.heroImage.alt || project.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-steel-400">
+                        Project
+                      </span>
+                    )}
+                    {/* Reveal-on-hover call to action. The title and client
+                        stay below the image rather than living in here: an
+                        overlay is a pointer affordance, and a touch device
+                        never fires hover, so anything only shown inside it
+                        would be unreachable on a phone. */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 flex items-center justify-center bg-brand-950/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    >
+                      <span className="rounded-sm bg-accent-600 px-4 py-2 text-xs font-semibold text-white">
+                        View Project
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1 px-4 py-3">
+                    <h3 className="text-sm leading-snug text-brand-900 group-hover:text-accent-600">
+                      {project.title}
+                    </h3>
+                    {project.clientName && (
+                      <p className="text-xs uppercase tracking-wide text-steel-400">
+                        {project.clientName}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Accreditation strip.
           Rendered only when something is published — an empty "Accredited by"
