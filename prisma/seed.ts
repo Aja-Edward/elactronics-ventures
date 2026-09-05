@@ -23,7 +23,21 @@ type DivisionSeed = {
   category: "EPCIM" | "SERVICE_OFFERING" | "PROCUREMENT";
   summary: string;
   order: number;
+  /** Long-form page copy. Only divisions whose page has been written carry it. */
+  body?: string;
+  /** Sidebar bullets on the division page. */
+  capabilities?: string[];
 };
+
+/**
+ * Paragraphs rather than one long string: the division page splits body text
+ * on blank lines, so the join is the format the renderer expects.
+ */
+const PIPELINE_BODY = [
+  "Elatronics Ventures supports pipeline operators across the full asset lifecycle - from construction and tie-in through inspection, monitoring and repair - covering gathering lines, trunk lines, flow lines and the associated station pipework. Scopes are planned around keeping the line in service: shutdown time is minimised and, where the technique allows, work is carried out on a live system.",
+  "Integrity work runs on measurement rather than assumption. Inspection and monitoring data feed an assessment of a line's current condition and remaining life, which in turn sets the repair strategy - composite wrap, clamp, repair saddle or spool replacement - and the interval before the next survey. Findings are reported against the applicable codes so operators can evidence compliance to regulators.",
+  "Work is delivered onshore, in swamp terrain and offshore, either as a single intervention or as a managed programme covering a whole network. Where a scope spans disciplines, the division draws on the inspection and NDT, general maintenance, and electrical, instrumentation and control teams under one set of project controls.",
+].join("\n\n");
 
 const DIVISIONS: DivisionSeed[] = [
   // ── EPCIM ──────────────────────────────────────────────────────────────
@@ -76,6 +90,19 @@ const DIVISIONS: DivisionSeed[] = [
     summary:
       "Pipeline construction, pigging, pressure testing and integrity services for gathering lines, trunk lines and associated infrastructure.",
     order: 12,
+    body: PIPELINE_BODY,
+    capabilities: [
+      "Pipeline inspection and integrity assessment",
+      "Pipeline monitoring and leak detection",
+      "Hot tapping and line stopping",
+      "Composite repair and structural reinforcement",
+      "Emergency pipeline closures, clamps and repair saddles",
+      "Pipe spool fabrication and replacement",
+      "Descaling, cleaning and pigging",
+      "Valve maintenance and repair",
+      "Storage tank inspection",
+      "Nitrogen services, helium leak testing and purging",
+    ],
   },
   {
     slug: "hydraulic-system-solutions",
@@ -136,6 +163,123 @@ const DIVISIONS: DivisionSeed[] = [
     order: 20,
   },
 ];
+
+/**
+ * Services that sit beneath a division, keyed by the parent division's slug.
+ *
+ * Separate from SKID_SYSTEMS below because these carry a divisionId instead of
+ * a group: the division page renders them as the service list under its
+ * overview copy, whereas the skid systems are their own top-level section.
+ */
+type DivisionServiceSeed = {
+  slug: string;
+  title: string;
+  summary: string;
+  order: number;
+};
+
+const DIVISION_SERVICES: Record<string, DivisionServiceSeed[]> = {
+  "pipeline-management": [
+    {
+      slug: "pipeline-construction-repairs",
+      title: "Pipeline Construction & Repairs",
+      summary:
+        "Construction, tie-in and repair of liquid and gas pipelines onshore and in swamp terrain, covering route preparation, welding, testing and reinstatement.",
+      order: 1,
+    },
+    {
+      slug: "pipe-spool-fabrication-replacement",
+      title: "Pipe Spool Fabrication & Replacement",
+      summary:
+        "Survey, fabrication and change-out of pipe spools for onshore, offshore and process plant pipework, with material traceability and weld records.",
+      order: 2,
+    },
+    {
+      slug: "hot-tapping-line-stopping",
+      title: "Hot Tapping & Line Stopping",
+      summary:
+        "Under-pressure drilling and line stopping that allow branch connections, isolations and repairs without taking the line out of service.",
+      order: 3,
+    },
+    {
+      slug: "emergency-pipeline-repair-eprs",
+      title: "Emergency Pipeline Repair (EPRS)",
+      summary:
+        "Standby repair arrangements for onshore and offshore lines, covering emergency closures, clamps and repair saddles for rapid containment of a leak or rupture.",
+      order: 4,
+    },
+    {
+      slug: "pipeline-inspection-services",
+      title: "Pipeline Inspection Services",
+      summary:
+        "In-line and external inspection to locate corrosion, wall loss and mechanical damage, consolidated into a single condition record for the line.",
+      order: 5,
+    },
+    {
+      slug: "pipeline-integrity-management",
+      title: "Pipeline Integrity Management",
+      summary:
+        "In-trench evaluation of reported anomalies, fitness-for-service assessment and remaining-life estimation used to prioritise repair and set survey intervals.",
+      order: 6,
+    },
+    {
+      slug: "pipeline-monitoring-leak-detection",
+      title: "Pipeline Monitoring & Leak Detection",
+      summary:
+        "Monitoring and detection systems configured to the operating profile of a gas or crude line, with alarms routed to the operator's control room.",
+      order: 7,
+    },
+    {
+      slug: "pipeline-pressure-monitoring",
+      title: "Pipeline Pressure Monitoring",
+      summary:
+        "Pressure surveillance and line-break control that flag an abnormal drop early and can trigger automatic isolation.",
+      order: 8,
+    },
+    {
+      slug: "pipeline-drone-inspection",
+      title: "Drone Inspection & Survey",
+      summary:
+        "Aerial inspection of pipelines, tanks, vessels and structures by licensed pilots, reaching right-of-way and elevated assets without scaffolding or rope access.",
+      order: 9,
+    },
+    {
+      slug: "composite-repair-reinforcement",
+      title: "Composite Repair & Structural Reinforcement",
+      summary:
+        "Engineered composite wraps that restore strength to corroded or damaged pipe, valves, tanks and structural steel, applied in service where the defect allows.",
+      order: 10,
+    },
+    {
+      slug: "pipeline-pre-commissioning",
+      title: "Pipeline Pre-Commissioning & Commissioning",
+      summary:
+        "Flooding, cleaning, gauging, hydrotesting, dewatering and drying of pipelines, risers and flow lines, through to handover of a line ready for product.",
+      order: 11,
+    },
+    {
+      slug: "pipeline-cleaning-pigging",
+      title: "Descaling, Cleaning & Pigging",
+      summary:
+        "Progressive pigging, chemical cleaning and descaling to restore bore, remove deposits and prepare a line for inspection or commissioning.",
+      order: 12,
+    },
+    {
+      slug: "valve-maintenance-repair",
+      title: "Valve Maintenance & Repair",
+      summary:
+        "Inspection, overhaul, testing and certification of pipeline and station valves, including actuator checks and in-situ repair where removal is impractical.",
+      order: 13,
+    },
+    {
+      slug: "nitrogen-leak-testing-services",
+      title: "Nitrogen Services & Leak Testing",
+      summary:
+        "Liquid and gaseous nitrogen for purging, inerting and pressure testing, together with helium leak testing of critical joints and systems.",
+      order: 14,
+    },
+  ],
+};
 
 /**
  * The skid-package systems. These hang off `Service.group` rather than a
@@ -210,6 +354,11 @@ async function seedDivisions() {
       order: d.order,
       status: "PUBLISHED" as const,
       publishedAt: new Date(),
+      // Spread conditionally: only some divisions ship long-form copy here, and
+      // a re-run must not blank a body an editor has since written for one the
+      // seed knows nothing but the summary of.
+      ...(d.body ? { body: d.body } : {}),
+      ...(d.capabilities ? { capabilities: d.capabilities } : {}),
     };
 
     await db.division.upsert({
@@ -220,6 +369,44 @@ async function seedDivisions() {
   }
 
   console.log(`  divisions       ok (${DIVISIONS.length})`);
+}
+
+async function seedDivisionServices() {
+  let count = 0;
+
+  for (const [divisionSlug, services] of Object.entries(DIVISION_SERVICES)) {
+    const division = await db.division.findUnique({
+      where: { slug: divisionSlug },
+      select: { id: true },
+    });
+
+    // A service with no division renders nowhere, so skip rather than orphan
+    // it. Divisions are seeded above, so a miss here means a stale slug.
+    if (!division) {
+      console.log(`  div services    SKIPPED - no division "${divisionSlug}"`);
+      continue;
+    }
+
+    for (const s of services) {
+      const data = {
+        title: s.title,
+        summary: s.summary,
+        divisionId: division.id,
+        order: s.order,
+        status: "PUBLISHED" as const,
+        publishedAt: new Date(),
+      };
+
+      await db.service.upsert({
+        where: { slug: s.slug },
+        create: { slug: s.slug, ...data },
+        update: data,
+      });
+      count += 1;
+    }
+  }
+
+  console.log(`  div services    ok (${count})`);
 }
 
 async function seedSkidSystems() {
@@ -283,6 +470,7 @@ async function main() {
   console.log("seeding:");
   await seedSiteSettings();
   await seedDivisions();
+  await seedDivisionServices();
   await seedSkidSystems();
   await seedAdmin();
   console.log("done.");
