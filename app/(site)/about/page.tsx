@@ -79,11 +79,11 @@ Elatronics Ventures is recognized as one of the leading Engineering, Procurement
 
 Elatronics Ventures delivers a comprehensive range of services tailored to meet the diverse needs of our clients. Our core capabilities include engineering design, project management, procurement, construction and supervision, commissioning and start-up, as well as operations and maintenance (O&M) services.
 
-Headquartered in **Nigeria**, Elatronics Ventures has established a growing presence across Africa through strategic subsidiaries and partnerships in **Ghana, Mozambique, Côte d'Ivoire, Uganda, and Kenya**, enabling us to execute projects efficiently across the continent.
+Headquartered in Nigeria, Elatronics Ventures has established a growing presence across Africa through strategic subsidiaries and partnerships in Ghana, Mozambique, Côte d'Ivoire, Uganda, and Kenya**, enabling us to execute projects efficiently across the continent.
 
-Over the past **20 years**, Elatronics Ventures has built a strong reputation for successfully delivering complex engineering projects. Our proven track record spans Engineering, EPCIM (Engineering, Procurement, Construction, Installation, and Management) turnkey projects, inspection services, operations and maintenance, marine support services, and the representation of leading Original Equipment Manufacturers (OEMs).
+Over the past 20 years, Elatronics Ventures has built a strong reputation for successfully delivering complex engineering projects. Our proven track record spans Engineering, EPCIM (Engineering, Procurement, Construction, Installation, and Management) turnkey projects, inspection services, operations and maintenance, marine support services, and the representation of leading Original Equipment Manufacturers (OEMs).
 
-Elatronics Ventures is also a specialized process engineering company that designs and builds a wide range of modular wellsite production systems for the **Upstream Oil & Gas**, **Midstream Oil & Gas**, **Downstream Refining**, and **Power Generation** industries. Our modular systems are skid-mounted, factory-tested, and designed for rapid installation using a plug-and-play approach. We develop customized solutions that meet each client's exact technical specifications and provide installation and commissioning services for projects anywhere in the world.
+Elatronics Ventures is also a specialized process engineering company that designs and builds a wide range of modular wellsite production systems for the Upstream Oil & Gas, Midstream Oil & Gas, Downstream Refining, and Power Generation** industries. Our modular systems are skid-mounted, factory-tested, and designed for rapid installation using a plug-and-play approach. We develop customized solutions that meet each client's exact technical specifications and provide installation and commissioning services for projects anywhere in the world.
 
 Through our global network of OEM manufacturing partners, Elatronics Ventures has access to world-class fabrication and assembly facilities capable of delivering sophisticated engineering packages. Our manufacturing capabilities support large-scale projects, including:
 
@@ -113,7 +113,7 @@ Through our global network of OEM manufacturing partners, Elatronics Ventures ha
 
 At Elatronics Ventures, quality is at the heart of everything we do. Our commitment to meeting stringent industry regulations and client specifications enables us to consistently deliver projects that comply with internationally accepted engineering and quality standards.
 
-Elatronics Ventures is fully committed to internationally recognized Quality, Health, Safety, and Environmental (QHSE) standards, including **ISO-compliant management systems**, in the execution of every project. We apply globally accepted project management methodologies to ensure that every assignment is delivered safely, efficiently, on schedule, and in full compliance with agreed contractual and regulatory standards.
+Elatronics Ventures is fully committed to internationally recognized Quality, Health, Safety, and Environmental (QHSE) standards, including ISO-compliant management systems, in the execution of every project. We apply globally accepted project management methodologies to ensure that every assignment is delivered safely, efficiently, on schedule, and in full compliance with agreed contractual and regulatory standards.
  ${site.country ?? "Nigeria"}.`;
 
   return (
