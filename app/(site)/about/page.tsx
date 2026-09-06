@@ -71,51 +71,53 @@ export default async function AboutPage() {
   ]);
 
   const intro =
-    page?.body ??
-    page?.description ??
-    `${site.companyName} – Company Profile
+  page?.body ??
+  page?.description ??
+  `${site.companyName} – Company Profile
 
 Elatronics Ventures is recognized as one of the leading Engineering, Procurement, and Construction (EPC) contractors operating across Africa. We provide innovative engineering and infrastructure solutions in the Oil & Gas (Midstream), Water Treatment, Renewable Energy, Power, Food & Beverage, and Industrial Plant sectors.
 
 Elatronics Ventures delivers a comprehensive range of services tailored to meet the diverse needs of our clients. Our core capabilities include engineering design, project management, procurement, construction and supervision, commissioning and start-up, as well as operations and maintenance (O&M) services.
 
-Headquartered in Nigeria, Elatronics Ventures has established a growing presence across Africa through strategic subsidiaries and partnerships in Ghana, Mozambique, Côte d'Ivoire, Uganda, and Kenya**, enabling us to execute projects efficiently across the continent.
+Headquartered in Nigeria, Elatronics Ventures has established a growing presence across Africa through strategic subsidiaries and partnerships in Ghana, Mozambique, Côte d'Ivoire, Uganda, and Kenya, enabling us to execute projects efficiently across the continent.
 
 Over the past 20 years, Elatronics Ventures has built a strong reputation for successfully delivering complex engineering projects. Our proven track record spans Engineering, EPCIM (Engineering, Procurement, Construction, Installation, and Management) turnkey projects, inspection services, operations and maintenance, marine support services, and the representation of leading Original Equipment Manufacturers (OEMs).
 
-Elatronics Ventures is also a specialized process engineering company that designs and builds a wide range of modular wellsite production systems for the Upstream Oil & Gas, Midstream Oil & Gas, Downstream Refining, and Power Generation** industries. Our modular systems are skid-mounted, factory-tested, and designed for rapid installation using a plug-and-play approach. We develop customized solutions that meet each client's exact technical specifications and provide installation and commissioning services for projects anywhere in the world.
+Elatronics Ventures is also a specialized process engineering company that designs and builds a wide range of modular wellsite production systems for the Upstream Oil & Gas, Midstream Oil & Gas, Downstream Refining, and Power Generation industries. Our modular systems are skid-mounted, factory-tested, and designed for rapid installation using a plug-and-play approach.
 
-Through our global network of OEM manufacturing partners, Elatronics Ventures has access to world-class fabrication and assembly facilities capable of delivering sophisticated engineering packages. Our manufacturing capabilities support large-scale projects, including:
-
-* Early Production Units (EPU)
-* Modular Production Packages
-* Chemical and Methanol Injection Skid Packages
-* Metering Skids
-* Compressor Skids
-* Control Panels and Integrated Control Systems
-* Filtration Skid Packages
-* Dehydration Skids
-* Lube Oil Skids
-* Multiphase Flow Meter Skids
-* Chemical Transfer Packages
-* Modular Wellsite Packages (MWP)
-* Early Production Facilities (EPF)
-* Nitrogen Generation System Packages
-* Oil Pipeline Pump Packages
-* Heavy Oil Pipeline Packages
-* Fuel Gas Conditioning Packages
-* Fuel Gas Conditioning Membrane Packages
-* Heat Transfer and Hot Oil Packages
-* Production Sand Removal Packages
-* Produced Water Injection Packages
-* Loading Arm Skid Packages
-* Integration and Industrial Automation Assemblies
+Through our global network of OEM manufacturing partners, Elatronics Ventures has access to world-class fabrication and assembly facilities capable of delivering sophisticated engineering packages.
 
 At Elatronics Ventures, quality is at the heart of everything we do. Our commitment to meeting stringent industry regulations and client specifications enables us to consistently deliver projects that comply with internationally accepted engineering and quality standards.
 
-Elatronics Ventures is fully committed to internationally recognized Quality, Health, Safety, and Environmental (QHSE) standards, including ISO-compliant management systems, in the execution of every project. We apply globally accepted project management methodologies to ensure that every assignment is delivered safely, efficiently, on schedule, and in full compliance with agreed contractual and regulatory standards.
- ${site.country ?? "Nigeria"}.`;
-
+Elatronics Ventures is fully committed to internationally recognized Quality, Health, Safety, and Environmental (QHSE) standards, including ISO-compliant management systems, in the execution of every project. We apply globally accepted project management methodologies to ensure that every assignment is delivered safely, efficiently, on schedule, and in full compliance with agreed contractual and regulatory standards.`;
+const PRODUCTS = [
+  "Modular wellsite production systems",
+  "Modular water treatment plants",
+  "Modular power generation systems",
+  "Early Production Units (EPU)",
+  "Modular Production Packages",
+  "Chemical and Methanol Injection Skid Packages",
+  "Metering Skids",
+  "Compressor Skids",
+  "Control Panels and Integrated Control Systems",
+  "Filtration Skid Packages",
+  "Dehydration Skids",
+  "Lube Oil Skids",
+  "Multiphase Flow Meter Skids",
+  "Chemical Transfer Packages",
+  "Modular Wellsite Packages (MWP)",
+  "Early Production Facilities (EPF)",
+  "Nitrogen Generation System Packages",
+  "Oil Pipeline Pump Packages",
+  "Heavy Oil Pipeline Packages",
+  "Fuel Gas Conditioning Packages",
+  "Fuel Gas Conditioning Membrane Packages",
+  "Heat Transfer and Hot Oil Packages",
+  "Production Sand Removal Packages",
+  "Produced Water Injection Packages",
+  "Loading Arm Skid Packages",
+  "Integration and Industrial Automation Assemblies",
+];
   return (
     <>
       <PageHero
@@ -133,6 +135,7 @@ Elatronics Ventures is fully committed to internationally recognized Quality, He
             <h2 className="font-display text-2xl font-bold tracking-tight text-brand-900">
               Who we are
             </h2>
+            
             <div className="prose-measure mt-4 space-y-4">
               {intro.split(/\n{2,}/).map((paragraph, i) => (
                 <p key={i} className="leading-relaxed text-steel-800">
@@ -140,6 +143,15 @@ Elatronics Ventures is fully committed to internationally recognized Quality, He
                 </p>
               ))}
             </div>
+            <h3 className="mt-8 font-display text-xl font-bold text-brand-900">
+              Our Engineering Packages
+            </h3>
+
+            <ul className="mt-4 list-disc space-y-2 pl-6 text-steel-800">
+              {PRODUCTS.map((product) => (
+                <li key={product}>{product}</li>
+              ))}
+            </ul>
           </div>
 
           <aside className="space-y-4">
