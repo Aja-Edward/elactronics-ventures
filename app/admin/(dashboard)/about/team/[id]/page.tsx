@@ -29,7 +29,7 @@ const FIELDS: Field[] = [
     name: "bio",
     label: "Biography",
     rows: 6,
-    maxLength: 1200,
+    maxLength: 2500,
     full: true,
     placeholder: "Background, qualifications and responsibilities.",
   },
