@@ -17,7 +17,7 @@ const Schema = z.object({
   name: z.string().trim().min(2, "Name is required."),
   slug: z.string().trim().max(120).optional().or(z.literal("")),
   role: z.string().trim().min(2, "Role is required."),
-  bio: z.string().trim().max(1200).optional().or(z.literal("")),
+  bio: z.string().trim().max(4000).optional().or(z.literal("")),
   linkedin: z.string().trim().max(300).optional().or(z.literal("")),
   email: z
     .string()
