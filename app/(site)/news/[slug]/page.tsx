@@ -27,16 +27,21 @@ const markdownComponents: Components = {
       {children}
     </h3>
   ),
+  // Justified to match .prose-measure elsewhere on the site. Applied per
+  // element rather than to the article wrapper, so headings and rules keep
+  // their natural alignment.
   p: ({ children }) => (
-    <p className="leading-relaxed text-steel-800">{children}</p>
+    <p className="leading-relaxed text-steel-800 hyphens-auto text-justify">
+      {children}
+    </p>
   ),
   ul: ({ children }) => (
-    <ul className="list-disc space-y-2 pl-6 leading-relaxed text-steel-800">
+    <ul className="list-disc space-y-2 pl-6 leading-relaxed text-steel-800 hyphens-auto text-justify">
       {children}
     </ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal space-y-2 pl-6 leading-relaxed text-steel-800">
+    <ol className="list-decimal space-y-2 pl-6 leading-relaxed text-steel-800 hyphens-auto text-justify">
       {children}
     </ol>
   ),

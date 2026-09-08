@@ -102,9 +102,22 @@ body {
   color: var(--foreground);
 }
 
-/* Long-form CMS copy runs at a readable measure by default. */
+/* Long-form CMS copy runs at a readable measure by default, and is justified
+   to give it a clean right edge.
+
+   Hyphenation is not optional here. Justifying alone leaves the browser only
+   the word spaces to stretch, which opens rivers of white down a narrow
+   column; letting it break words as well keeps the gaps even. It works off the
+   lang attribute on <html>, which is set in the root layout.
+
+   Applied to the block rather than to p, because every element inside a
+   .prose-measure block is a paragraph. Anywhere that also renders headings or
+   lists - the news article, which comes through Markdown - justifies its
+   paragraphs individually instead, so a wrapped heading is not stretched. */
 .prose-measure {
   max-width: 68ch;
+  text-align: justify;
+  hyphens: auto;
 }
 
 /* Legibility over an undimmed photograph. Carrying the contrast on the
