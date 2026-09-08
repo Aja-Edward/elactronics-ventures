@@ -312,6 +312,522 @@ const DIVISION_SERVICES: Record<string, DivisionServiceSeed[]> = {
     },
   ],
 
+
+  /**
+   * Capability sub-pages for the remaining divisions.
+   *
+   * Every division on the reference site opens into a grid of these, not just
+   * procurement, and until now only pipeline management had any - so eleven
+   * division pages rendered with no grid at all.
+   *
+   * They name disciplines rather than jobs delivered. The temptation is to
+   * list work done for named clients, but that is a per-company fact that
+   * belongs to Elatronics and cannot be invented here; where the site wants
+   * client-specific work it already has Projects, which carry a client and a
+   * year. Summaries only, deliberately: what a division does is generic enough
+   * to draft, while how it delivers is the company's own detail, and a page of
+   * plausible filler is harder to notice and replace than an empty one. The
+   * admin flags every record still missing a body.
+   */
+  "offshore-onshore-construction-installation": [
+    {
+      slug: "structural-fabrication",
+      title: "Structural Fabrication",
+      summary:
+        "Fabrication of platform structures, decks, skids and support steelwork to approved drawings, with weld procedures and material traceability maintained throughout.",
+      order: 1,
+    },
+    {
+      slug: "platform-hook-up-commissioning",
+      title: "Platform Hook-up & Commissioning",
+      summary:
+        "Hook-up of topsides equipment, tie-in of piping and cabling, and pre-commissioning through to handover of a system ready for start-up.",
+      order: 2,
+    },
+    {
+      slug: "specialist-welding",
+      title: "Specialist Welding",
+      summary:
+        "Coded welding across carbon, alloy, stainless and duplex materials, including procedure qualification and welder certification for the applicable code.",
+      order: 3,
+    },
+    {
+      slug: "pipe-spooling-fabrication",
+      title: "Pipe Spooling & Fabrication",
+      summary:
+        "Isometric take-off, shop fabrication and delivery of pipe spools, with dimensional control and weld records kept against each spool number.",
+      order: 4,
+    },
+    {
+      slug: "tank-construction-erection",
+      title: "Tank Construction & Erection",
+      summary:
+        "Site erection and modification of storage tanks and vessels, covering plate work, welding, testing and the associated inspection records.",
+      order: 5,
+    },
+    {
+      slug: "conductor-wellhead-prefabrication",
+      title: "Conductor & Wellhead Prefabrication",
+      summary:
+        "Prefabrication of conductor pipe, casing joints and wellhead components, welded and dimensionally checked before delivery to the drilling location.",
+      order: 6,
+    },
+    {
+      slug: "modular-skid-cargo-frames",
+      title: "Modular Skids & Cargo Frames",
+      summary:
+        "Build of skid frames, containerised units and offshore lifting frames to the certification and load-testing required for offshore transfer.",
+      order: 7,
+    },
+    {
+      slug: "onshore-facility-construction",
+      title: "Onshore Facility Construction",
+      summary:
+        "Civil, structural and mechanical construction for onshore plant and terminal facilities, from foundations through to equipment installation.",
+      order: 8,
+    },
+  ],
+  "marine-support-asset-integrity": [
+    {
+      slug: "marine-logistics-vessel-support",
+      title: "Marine Logistics & Vessel Support",
+      summary:
+        "Coordination of vessel movements, offshore transfers and marine spread support for construction, inspection and maintenance campaigns.",
+      order: 1,
+    },
+    {
+      slug: "offshore-asset-inspection",
+      title: "Offshore Asset Inspection",
+      summary:
+        "Scheduled inspection of platforms, jackets and topsides equipment, producing a condition record that feeds the integrity management plan.",
+      order: 2,
+    },
+    {
+      slug: "structural-integrity-assessment",
+      title: "Structural Integrity Assessment",
+      summary:
+        "Assessment of structural condition and remaining life from inspection data, used to prioritise remedial work and set the next survey interval.",
+      order: 3,
+    },
+    {
+      slug: "splash-zone-underwater-repair",
+      title: "Splash Zone & Underwater Repair",
+      summary:
+        "Repair and reinforcement of members in the splash zone and below water, including clamps, wraps and coating systems suited to immersed service.",
+      order: 4,
+    },
+    {
+      slug: "mooring-system-inspection",
+      title: "Mooring System Inspection & Maintenance",
+      summary:
+        "Inspection of chains, wires, connectors and buoyancy, with change-out and re-certification of components that fall outside acceptance criteria.",
+      order: 5,
+    },
+    {
+      slug: "corrosion-protection-coating",
+      title: "Corrosion Protection & Coating",
+      summary:
+        "Surface preparation, protective coating and cathodic protection work that extends the service life of exposed marine and offshore steelwork.",
+      order: 6,
+    },
+  ],
+  "general-maintenance": [
+    {
+      slug: "planned-preventive-maintenance",
+      title: "Planned Preventive Maintenance",
+      summary:
+        "Routine servicing carried out to a maintenance schedule, keeping equipment within its operating envelope and reducing unplanned downtime.",
+      order: 1,
+    },
+    {
+      slug: "shutdown-turnaround-support",
+      title: "Shutdown & Turnaround Support",
+      summary:
+        "Planning and execution of shutdown scopes, with manpower, tooling and inspection coordinated to return the plant to service on schedule.",
+      order: 2,
+    },
+    {
+      slug: "corrective-breakdown-repair",
+      title: "Corrective & Breakdown Repair",
+      summary:
+        "Response to equipment failures, covering fault diagnosis, repair or replacement, and the checks needed before the unit is returned to duty.",
+      order: 3,
+    },
+    {
+      slug: "mechanical-maintenance-services",
+      title: "Mechanical Maintenance",
+      summary:
+        "Overhaul and adjustment of mechanical plant, including alignment, bolt torquing, seal replacement and the associated condition checks.",
+      order: 4,
+    },
+    {
+      slug: "facility-fabric-maintenance",
+      title: "Facility & Fabric Maintenance",
+      summary:
+        "Upkeep of buildings, structures, walkways and coatings across a facility, including remedial work identified during routine inspection.",
+      order: 5,
+    },
+    {
+      slug: "maintenance-manpower-support",
+      title: "Maintenance Manpower & Technical Support",
+      summary:
+        "Supply of qualified technicians and supervisors to supplement an operator's own maintenance team for a campaign or a sustained period.",
+      order: 6,
+    },
+  ],
+  "inspection-ndt": [
+    {
+      slug: "conventional-ndt",
+      title: "Conventional NDT",
+      summary:
+        "Ultrasonic, magnetic particle, dye penetrant and visual inspection applied to welds, castings and in-service components.",
+      order: 1,
+    },
+    {
+      slug: "advanced-ultrasonics",
+      title: "Advanced Ultrasonics (PAUT & TOFD)",
+      summary:
+        "Phased array and time-of-flight diffraction inspection where conventional ultrasonics cannot resolve the flaw type or geometry involved.",
+      order: 2,
+    },
+    {
+      slug: "radiographic-testing",
+      title: "Radiographic Testing",
+      summary:
+        "Radiography of welds and components, with exposure, processing and interpretation carried out to the acceptance standard in force.",
+      order: 3,
+    },
+    {
+      slug: "weld-inspection-qualification",
+      title: "Weld Inspection & Qualification",
+      summary:
+        "Witnessing and documentation of welding procedure and welder qualification, and inspection of production welds against the approved procedure.",
+      order: 4,
+    },
+    {
+      slug: "corrosion-mapping-thickness-survey",
+      title: "Corrosion Mapping & Thickness Survey",
+      summary:
+        "Wall thickness measurement and corrosion mapping of piping, vessels and tanks, consolidated into a record that supports fitness-for-service.",
+      order: 5,
+    },
+    {
+      slug: "lifting-equipment-inspection",
+      title: "Lifting Equipment Inspection & Certification",
+      summary:
+        "Examination, proof loading and certification of cranes, slings and lifting accessories to the intervals the applicable regulations require.",
+      order: 6,
+    },
+    {
+      slug: "positive-material-identification",
+      title: "Positive Material Identification",
+      summary:
+        "On-site alloy verification of piping, fittings and components, confirming that installed material matches the specified grade.",
+      order: 7,
+    },
+  ],
+  "electrical-instrumentation-control": [
+    {
+      slug: "electrical-installation-termination",
+      title: "Electrical Installation & Termination",
+      summary:
+        "Installation of cable, containment, distribution equipment and terminations, tested and documented before energisation.",
+      order: 1,
+    },
+    {
+      slug: "instrument-calibration-loop-testing",
+      title: "Instrument Calibration & Loop Testing",
+      summary:
+        "Calibration of field instruments and end-to-end loop checks, producing the certificates that support the commissioning record.",
+      order: 2,
+    },
+    {
+      slug: "control-automation-systems",
+      title: "Control & Automation Systems",
+      summary:
+        "Installation, configuration and fault-finding on PLC, DCS and ESD systems, including modification of existing control logic.",
+      order: 3,
+    },
+    {
+      slug: "hazardous-area-inspection",
+      title: "Hazardous Area Inspection",
+      summary:
+        "Inspection of Ex equipment and installations to the required grade, with a defect register and the remedial work needed to close it out.",
+      order: 4,
+    },
+    {
+      slug: "cable-laying-testing",
+      title: "Cable Laying, Testing & Termination",
+      summary:
+        "Routing, pulling, glanding and testing of power, control and instrumentation cable, including insulation resistance and continuity records.",
+      order: 5,
+    },
+    {
+      slug: "switchgear-panel-maintenance",
+      title: "Switchgear & Panel Maintenance",
+      summary:
+        "Servicing of switchgear, motor control centres and control panels, covering inspection, cleaning, protection testing and functional checks.",
+      order: 6,
+    },
+  ],
+  "hydraulic-system-solutions": [
+    {
+      slug: "hydraulic-power-unit-overhaul",
+      title: "Hydraulic Power Unit Overhaul",
+      summary:
+        "Strip-down, inspection and rebuild of hydraulic power units, returning the pack to its rated pressure, flow and cleanliness condition.",
+      order: 1,
+    },
+    {
+      slug: "cylinder-repair-reconditioning",
+      title: "Cylinder Repair & Reconditioning",
+      summary:
+        "Repair of hydraulic cylinders, covering seal replacement, rod and bore reconditioning, and pressure testing before return to service.",
+      order: 2,
+    },
+    {
+      slug: "hose-assembly-replacement",
+      title: "Hose Assembly & Replacement",
+      summary:
+        "Made-up hydraulic assemblies to the correct hose, fitting and thread combination, supplied with pressure test records where required.",
+      order: 3,
+    },
+    {
+      slug: "oil-flushing-cleanliness",
+      title: "Oil Flushing & Cleanliness Control",
+      summary:
+        "Flushing of hydraulic and lube systems to a target cleanliness code, with particle counts recorded before and after the flush.",
+      order: 4,
+    },
+    {
+      slug: "system-commissioning-troubleshooting",
+      title: "System Commissioning & Troubleshooting",
+      summary:
+        "Commissioning of new hydraulic systems and diagnosis of pressure, flow and contamination faults on systems already in service.",
+      order: 5,
+    },
+    {
+      slug: "hydraulic-valve-manifold-servicing",
+      title: "Valve & Manifold Servicing",
+      summary:
+        "Servicing and functional testing of directional, pressure and flow control valves and the manifolds they are mounted on.",
+      order: 6,
+    },
+  ],
+  "hose-management-solutions": [
+    {
+      slug: "hose-register-tagging",
+      title: "Hose Register & Asset Tagging",
+      summary:
+        "Tagging and registration of every hose on site, so each assembly carries a traceable identity and a known test and replacement history.",
+      order: 1,
+    },
+    {
+      slug: "hose-pressure-testing-certification",
+      title: "Pressure Testing & Certification",
+      summary:
+        "Hydrostatic testing of hose assemblies to the required interval, issued with certificates that satisfy the operator's assurance regime.",
+      order: 2,
+    },
+    {
+      slug: "hose-assembly-fabrication",
+      title: "Hose Assembly & Fabrication",
+      summary:
+        "Assembly of hoses to length with the specified couplings, ferrules and end fittings, crimped and tested before issue.",
+      order: 3,
+    },
+    {
+      slug: "hose-inspection-condition-monitoring",
+      title: "Inspection & Condition Monitoring",
+      summary:
+        "Periodic inspection of hoses in service, recording wear, damage and age so replacement is planned rather than reactive.",
+      order: 4,
+    },
+    {
+      slug: "hose-change-out-programmes",
+      title: "Replacement & Change-out Programmes",
+      summary:
+        "Scheduled change-out of hoses approaching end of life, planned around operations to avoid unplanned isolation of the system.",
+      order: 5,
+    },
+  ],
+  "environmental-laboratory-support": [
+    {
+      slug: "environmental-baseline-studies",
+      title: "Environmental Baseline Studies",
+      summary:
+        "Baseline surveys that establish the environmental condition of a site before work begins, providing the reference for later comparison.",
+      order: 1,
+    },
+    {
+      slug: "water-effluent-analysis",
+      title: "Water & Effluent Analysis",
+      summary:
+        "Sampling and analysis of process water, effluent and discharge streams against the consent limits that apply to the operation.",
+      order: 2,
+    },
+    {
+      slug: "soil-sediment-sampling",
+      title: "Soil & Sediment Sampling",
+      summary:
+        "Collection and analysis of soil and sediment samples, including chain-of-custody handling and reporting against the relevant screening values.",
+      order: 3,
+    },
+    {
+      slug: "air-quality-emissions-monitoring",
+      title: "Air Quality & Emissions Monitoring",
+      summary:
+        "Monitoring of ambient air quality and point-source emissions, with results reported in the format the regulator expects.",
+      order: 4,
+    },
+    {
+      slug: "laboratory-analysis-reporting",
+      title: "Laboratory Analysis & Reporting",
+      summary:
+        "Laboratory testing of collected samples and consolidation of results into a report that states method, detection limit and interpretation.",
+      order: 5,
+    },
+    {
+      slug: "waste-characterisation-support",
+      title: "Waste Characterisation & Management Support",
+      summary:
+        "Characterisation of waste streams and support for their segregation, storage and lawful disposal through approved routes.",
+      order: 6,
+    },
+  ],
+  "oilfield-support-services": [
+    {
+      slug: "drilling-completion-support",
+      title: "Drilling & Completion Support",
+      summary:
+        "Support to drilling and completion operations, covering equipment provision, handling and the personnel needed at the well site.",
+      order: 1,
+    },
+    {
+      slug: "oilfield-manpower-supply",
+      title: "Personnel & Manpower Supply",
+      summary:
+        "Supply of qualified oilfield personnel on a call-off or campaign basis, with competence and certification verified before mobilisation.",
+      order: 2,
+    },
+    {
+      slug: "equipment-rental-provision",
+      title: "Equipment Rental & Provision",
+      summary:
+        "Provision of oilfield equipment on rental, delivered inspected and certified, with support for the duration of the hire.",
+      order: 3,
+    },
+    {
+      slug: "site-logistics-camp-support",
+      title: "Site Logistics & Camp Support",
+      summary:
+        "Logistics, accommodation and catering support that keeps a remote or offshore work site running through the length of a campaign.",
+      order: 4,
+    },
+    {
+      slug: "well-site-services",
+      title: "Well Site Services",
+      summary:
+        "Services delivered at the well site during drilling, workover and intervention, coordinated around the operator's programme.",
+      order: 5,
+    },
+  ],
+  "rotating-equipment-repair": [
+    {
+      slug: "pump-overhaul-repair",
+      title: "Pump Overhaul & Repair",
+      summary:
+        "Strip, inspect and rebuild of centrifugal and positive-displacement pumps, including wear part replacement and performance testing.",
+      order: 1,
+    },
+    {
+      slug: "compressor-maintenance",
+      title: "Compressor Maintenance",
+      summary:
+        "Overhaul and routine maintenance of reciprocating, screw and centrifugal compressors, with clearances and running checks recorded.",
+      order: 2,
+    },
+    {
+      slug: "turbine-inspection-repair",
+      title: "Turbine Inspection & Repair",
+      summary:
+        "Inspection and repair of gas and steam turbine components, covering blades, bearings, seals and the associated control elements.",
+      order: 3,
+    },
+    {
+      slug: "gearbox-rebuild",
+      title: "Gearbox Rebuild",
+      summary:
+        "Rebuild of industrial gearboxes, including gear and bearing replacement, backlash setting and load testing before return to service.",
+      order: 4,
+    },
+    {
+      slug: "laser-shaft-alignment",
+      title: "Laser Shaft Alignment",
+      summary:
+        "Precision alignment of driver and driven machines using laser equipment, with as-found and as-left readings recorded.",
+      order: 5,
+    },
+    {
+      slug: "dynamic-balancing",
+      title: "Dynamic Balancing",
+      summary:
+        "In-situ and workshop balancing of rotors and impellers to reduce vibration to within the acceptance limits for the machine.",
+      order: 6,
+    },
+    {
+      slug: "vibration-analysis-condition-monitoring",
+      title: "Vibration Analysis & Condition Monitoring",
+      summary:
+        "Vibration measurement and trending that identifies bearing, alignment and imbalance faults before they progress to failure.",
+      order: 7,
+    },
+  ],
+  "heavy-lifting-transportation": [
+    {
+      slug: "lift-planning-engineering",
+      title: "Lift Planning & Engineering",
+      summary:
+        "Lift studies, rigging arrangements and method statements prepared for complex and heavy lifts before any equipment is mobilised.",
+      order: 1,
+    },
+    {
+      slug: "crane-rigging-services",
+      title: "Crane & Rigging Services",
+      summary:
+        "Provision of cranes, rigging crews and certified lifting gear for installation, maintenance and construction lifts.",
+      order: 2,
+    },
+    {
+      slug: "heavy-haulage-abnormal-loads",
+      title: "Heavy Haulage & Abnormal Loads",
+      summary:
+        "Road transport of oversized and overweight loads, including route survey, permitting and escorting where required.",
+      order: 3,
+    },
+    {
+      slug: "load-out-roll-on-roll-off",
+      title: "Load-out & Roll-on / Roll-off",
+      summary:
+        "Load-out of fabricated structures to barge or vessel by crane, skidding or self-propelled transporter, to an agreed load-out procedure.",
+      order: 4,
+    },
+    {
+      slug: "jacking-skidding-positioning",
+      title: "Jacking, Skidding & Positioning",
+      summary:
+        "Controlled jacking, skidding and final positioning of heavy equipment where crane access is restricted or unavailable.",
+      order: 5,
+    },
+    {
+      slug: "lifting-gear-supply-certification",
+      title: "Lifting Gear Supply & Certification",
+      summary:
+        "Supply of slings, shackles and lifting accessories with proof-load test and material certification for the intended working load.",
+      order: 6,
+    },
+  ],
+
   /**
    * Procurement supply lines.
    *
