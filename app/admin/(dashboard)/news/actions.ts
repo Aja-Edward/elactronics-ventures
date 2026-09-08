@@ -7,6 +7,7 @@ import { z } from "zod";
 import { canPublish, getCurrentUser } from "@/lib/auth";
 import { tags } from "@/lib/cache-tags";
 import { db } from "@/lib/db";
+import { postPath } from "@/lib/news";
 import { recordSlugChange } from "@/lib/redirects";
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -80,15 +81,23 @@ export async function savePost(
     isFeatured: d.isFeatured === "on",
   };
 
+  // type is read alongside slug because both decide the URL: news articles
+  // live at /news/<slug> and blog articles at /blog/<slug>, so reclassifying a
+  // post moves it just as surely as renaming one does.
   const existing = id
-    ? await db.post.findUnique({ where: { id }, select: { slug: true } })
+    ? await db.post.findUnique({ where: { id }, select: { slug: true, type: true } })
     : null;
 
   if (id) {
     await db.post.update({ where: { id }, data });
-    if (existing && existing.slug !== d.slug) {
-      await recordSlugChange(`/news/${existing.slug}`, `/news/${d.slug}`);
-      updateTag(tags.redirects());
+
+    if (existing) {
+      const from = postPath({ slug: existing.slug, type: existing.type });
+      const to = postPath({ slug: d.slug, type: d.type });
+      if (from !== to) {
+        await recordSlugChange(from, to);
+        updateTag(tags.redirects());
+      }
     }
   } else {
     const created = await db.post.create({ data });

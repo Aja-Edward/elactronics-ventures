@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { formatPostDate } from "@/lib/news";
 
 export const instant = false;
-export const metadata: Metadata = { title: "News" };
+export const metadata: Metadata = { title: "News & Blog" };
 
 export default async function NewsAdminPage() {
   const user = await getCurrentUser();
@@ -32,7 +32,9 @@ export default async function NewsAdminPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-brand-900">News</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-brand-900">
+            News &amp; Blog
+          </h1>
           <p className="mt-1 text-sm text-steel-700">
             {posts.filter((p) => p.published).length} of {posts.length} published.
           </p>

@@ -53,7 +53,7 @@ export default function PostTable({ posts, canManage }: { posts: PostSummary[]; 
                   </div>
                 </td>
                 <td className="px-4 py-3 text-sm text-steel-700">
-                  {post.type === "BLOG" ? "Article" : "News"}
+                  {post.type === "BLOG" ? "Blog" : "News"}
                 </td>
                 <td className="px-4 py-3 text-sm text-steel-700 tabular-nums">
                   {post.publishedLabel ?? "—"}

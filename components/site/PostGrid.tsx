@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { formatPostDate } from "@/lib/news";
+import { formatPostDate, postPath } from "@/lib/news";
 
 type Post = {
   id: string;
@@ -31,7 +31,7 @@ export default function PostGrid({ posts }: { posts: Post[] }) {
       {posts.map((post) => (
         <li key={post.id}>
           <Link
-            href={`/news/${post.slug}`}
+            href={postPath(post)}
             className="group flex h-full flex-col overflow-hidden rounded-lg border border-brand-100 bg-white transition-colors hover:border-brand-300"
           >
             <div className="relative aspect-[16/10] bg-surface">

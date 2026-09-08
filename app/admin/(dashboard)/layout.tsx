@@ -25,7 +25,7 @@ const ADMIN_NAV = [
   { label: "OEM", href: "/admin/oem" },
   { label: "Projects", href: "/admin/projects" },
   { label: "Certifications", href: "/admin/certifications" },
-  { label: "News", href: "/admin/news" },
+  { label: "News & Blog", href: "/admin/news" },
   { label: "Gallery", href: "/admin/gallery" },
   { label: "Pages", href: "/admin/pages" },
   { label: "Media", href: "/admin/media" },

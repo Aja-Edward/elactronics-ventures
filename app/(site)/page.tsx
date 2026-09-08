@@ -7,7 +7,7 @@ import HeroCarousel from "@/components/site/HeroCarousel";
 import WelcomeHero from "@/components/site/WelcomeHero";
 import { getPublishedCertifications } from "@/lib/certifications";
 import { getPublishedHeroSlides } from "@/lib/hero";
-import { formatPostDate, getPublishedPosts } from "@/lib/news";
+import { formatPostDate, getPublishedPosts, postPath } from "@/lib/news";
 import { getOemPartners } from "@/lib/oem";
 import { getPublishedProjects } from "@/lib/projects";
 import { db } from "@/lib/db";
@@ -327,7 +327,7 @@ export default async function Home() {
               {posts.map((post) => (
                 <Link
                   key={post.id}
-                  href={`/news/${post.slug}`}
+                  href={postPath(post)}
                   className="group flex h-full flex-col overflow-hidden rounded-sm border border-brand-100 bg-white transition-colors hover:border-brand-300"
                 >
                   <div className="relative aspect-[5/3] bg-surface">

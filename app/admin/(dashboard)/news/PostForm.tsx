@@ -59,6 +59,9 @@ export default function PostForm({
   const [title, setTitle] = useState(values.title);
   const [slug, setSlug] = useState(values.slug);
   const [slugLocked] = useState(Boolean(values.id));
+  // Held in state only so the slug hint can show the address this post will
+  // actually have: news and blog articles live under different prefixes.
+  const [type, setType] = useState(values.type);
   const err = (k: string) => state.fieldErrors?.[k];
 
   return (
@@ -105,8 +108,10 @@ export default function PostForm({
               className={`${field} font-mono`}
             />
             <p className="text-xs text-steel-500">
-              /news/{slug || "…"}
-              {slugLocked && " — renaming creates a 301 automatically."}
+              {type === "BLOG" ? "/blog/" : "/news/"}
+              {slug || "…"}
+              {slugLocked &&
+                " — renaming it, or switching between News and Blog, creates a 301 automatically."}
             </p>
             {err("slug") && <p className="text-xs text-accent-700">{err("slug")}</p>}
           </div>
@@ -151,10 +156,20 @@ export default function PostForm({
               <label htmlFor="type" className={labelCls}>
                 Type
               </label>
-              <select id="type" name="type" defaultValue={values.type} className={field}>
+              <select
+                id="type"
+                name="type"
+                value={type}
+                onChange={(e) => setType(e.target.value as PostValues["type"])}
+                className={field}
+              >
                 <option value="NEWS">News</option>
-                <option value="BLOG">Article</option>
+                <option value="BLOG">Blog</option>
               </select>
+              <p className="text-xs text-steel-500">
+                News is listed at /news, Blog at /blog. This also decides the
+                article&rsquo;s own address.
+              </p>
             </div>
 
             <div className="space-y-1.5">

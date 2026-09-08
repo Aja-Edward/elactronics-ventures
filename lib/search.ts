@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { postPath } from "./news";
 
 /**
  * Site search across published content.
@@ -18,7 +19,7 @@ export type SearchHit = {
   title: string;
   excerpt: string | null;
   href: string;
-  kind: "Division" | "Service" | "Equipment" | "Project" | "News" | "Certification";
+  kind: "Division" | "Service" | "Equipment" | "Project" | "News" | "Blog" | "Certification";
 };
 
 const MAX_PER_KIND = 6;
@@ -83,7 +84,9 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
         OR: [{ title: like }, { excerpt: like }, { body: like }],
       },
       take: MAX_PER_KIND,
-      select: { id: true, slug: true, title: true, excerpt: true },
+      // type decides both the link and the label: news and blog articles live
+      // at different addresses now.
+      select: { id: true, slug: true, title: true, excerpt: true, type: true },
     }),
     db.certification.findMany({
       where: {
@@ -118,7 +121,7 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
     })),
     ...posts.map((p: (typeof posts)[number]): SearchHit => ({
       id: p.id, title: p.title, excerpt: p.excerpt,
-      href: `/news/${p.slug}`, kind: "News",
+      href: postPath(p), kind: p.type === "BLOG" ? "Blog" : "News",
     })),
     ...certifications.map((c: (typeof certifications)[number]): SearchHit => ({
       id: c.id, title: c.name, excerpt: c.issuer,

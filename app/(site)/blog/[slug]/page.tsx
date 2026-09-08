@@ -6,37 +6,35 @@ import { getPostBySlug, getPostSlugs } from "@/lib/news";
 import { findRedirect } from "@/lib/redirects";
 
 /**
- * A news item.
+ * A blog article.
  *
- * Scoped to NEWS: blog articles have their own route at /blog/[slug], and
- * serving both kinds from both addresses would put every post at two URLs.
- * A post reclassified as a blog article stops resolving here and picks up the
- * redirect the admin wrote when its type changed.
+ * The mirror of /news/[slug], scoped to BLOG. Both fetch from the same model
+ * and render the same component; only the kind and the section wording differ.
  */
 
 // Reads params, which is per-request data.
 export const instant = false;
 
 /**
- * Sentinel when empty — Cache Components requires at least one entry, and an
- * empty News table must not break the build.
+ * Sentinel when empty — Cache Components requires at least one entry, and the
+ * blog is empty today, so without it the build would fail outright.
  */
 export async function generateStaticParams() {
-  const slugs = await getPostSlugs("NEWS");
+  const slugs = await getPostSlugs("BLOG");
   return slugs.length ? slugs.map((slug) => ({ slug })) : [{ slug: "__none__" }];
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/news/[slug]">): Promise<Metadata> {
+}: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug, "NEWS");
+  const post = await getPostBySlug(slug, "BLOG");
   if (!post) return { title: "Not found", robots: { index: false } };
 
   return {
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt || undefined,
-    alternates: { canonical: `/news/${post.slug}` },
+    alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       title: post.seoTitle || post.title,
       description: post.seoDescription || post.excerpt || undefined,
@@ -49,16 +47,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function NewsArticleRoute({
+export default async function BlogArticleRoute({
   params,
-}: PageProps<"/news/[slug]">) {
+}: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug, "NEWS");
+  const post = await getPostBySlug(slug, "BLOG");
 
   if (!post) {
-    // Covers the reclassified case as well as the renamed one: both are
-    // recorded as redirects by the admin.
-    const moved = await findRedirect(`/news/${slug}`);
+    const moved = await findRedirect(`/blog/${slug}`);
     if (moved) permanentRedirect(moved.destination);
     notFound();
   }
