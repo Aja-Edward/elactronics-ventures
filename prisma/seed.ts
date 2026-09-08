@@ -1368,8 +1368,77 @@ async function seedAdmin() {
   console.log(`  admin user      ok (${email})`);
 }
 
+
+/**
+ * Refuse to write to a database that is not obviously a local one.
+ *
+ * This seed upserts. It overwrites the title, summary, order and status of
+ * every division and sub-page, and the whole SiteSetting row, so running it
+ * against a live database silently discards anything edited through the admin
+ * since the seed was last written. Nothing in the command distinguishes the
+ * two, and .env in this project points at the hosted database, so the default
+ * target is the one where a mistake costs the most.
+ *
+ * The opt-in names the host rather than being a generic --force, because the
+ * failure this guards against is not knowing which database you are pointed
+ * at. A flag you can memorise would be typed just as reflexively against the
+ * wrong one; a hostname has to be read off the error before it can be used.
+ */
+function assertSafeTarget() {
+  // Whatever lib/db would connect with, resolved the same way it resolves it.
+  const connectionString =
+    process.env.DATABASE_URL_POOLED ?? process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    console.error("No database connection string. Set DATABASE_URL_POOLED or DATABASE_URL.");
+    process.exit(1);
+  }
+
+  let host: string;
+  try {
+    host = new URL(connectionString).hostname;
+  } catch {
+    console.error("DATABASE_URL is not a URL this script can read a host out of.");
+    process.exit(1);
+  }
+
+  const LOCAL = new Set(["localhost", "127.0.0.1", "::1", "host.docker.internal"]);
+  const isLocal = LOCAL.has(host);
+
+  // Printed on every run, local or not. The point is that the target is never
+  // something you have to infer.
+  console.log(`  target          ${host}${isLocal ? " (local)" : " (REMOTE)"}`);
+
+  if (isLocal) return;
+
+  if (process.env.SEED_ALLOW_REMOTE === host) {
+    console.log("  target          remote write allowed for this host");
+    return;
+  }
+
+  console.error(
+    [
+      "",
+      "Refusing to seed a remote database.",
+      "",
+      `  target host:  ${host}`,
+      "",
+      "  This seed overwrites the title, summary, order and status of every",
+      "  division and sub-page, and the whole SiteSetting row. Anything edited",
+      "  through the admin since the seed was last written would be lost.",
+      "",
+      "  If that is genuinely what you want, name the host:",
+      "",
+      `    SEED_ALLOW_REMOTE=${host} npx tsx prisma/seed.ts`,
+      "",
+    ].join("\n"),
+  );
+  process.exit(1);
+}
+
 async function main() {
   console.log("seeding:");
+  assertSafeTarget();
   await seedSiteSettings();
   await seedDivisions();
   await seedDivisionServices();
