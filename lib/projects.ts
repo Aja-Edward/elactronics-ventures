@@ -38,7 +38,7 @@ export async function getProjectBySlug(slug: string) {
       location: true, year: true, scope: true,
       challenge: true, solution: true, results: true,
       seoTitle: true, seoDescription: true,
-      heroImage: { select: { secureUrl: true, alt: true } },
+      heroImage: { select: { secureUrl: true, alt: true, width: true } },
       division: { select: { slug: true, title: true } },
       gallery: {
         orderBy: { order: "asc" },

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
+import PageHero from "@/components/site/PageHero";
 import { getProjectBySlug, getProjectSlugs } from "@/lib/projects";
 import { findRedirect } from "@/lib/redirects";
 
@@ -83,37 +84,12 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
 
   return (
     <>
-      <section className="relative overflow-hidden bg-brand-950">
-        {project.heroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={project.heroImage.secureUrl}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-25"
-            />
-          </div>
-        )}
-        <div className="relative mx-auto max-w-6xl px-6 py-20">
-          <nav aria-label="Breadcrumb" className="text-xs text-steel-300">
-            <Link href="/projects" className="hover:text-white">
-              Projects
-            </Link>
-            <span className="mx-2 text-steel-500">/</span>
-            <span className="text-white">{project.title}</span>
-          </nav>
-          <h1 className="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
-            {project.title}
-          </h1>
-          {project.scope && (
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-brand-200">
-              {project.scope}
-            </p>
-          )}
-        </div>
-      </section>
+      <PageHero
+        title={project.title}
+        intro={project.scope ?? undefined}
+        trail={[{ label: "Projects", href: "/projects" }]}
+        image={project.heroImage}
+      />
 
       <section className="bg-white py-16">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1.7fr_1fr]">

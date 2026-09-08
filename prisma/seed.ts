@@ -27,6 +27,17 @@ type DivisionSeed = {
   body?: string;
   /** Sidebar bullets on the division page. */
   capabilities?: string[];
+  /**
+   * Cloudinary publicId of the banner, resolved to a Media row at seed time.
+   * Referenced by publicId rather than database id for the same reason the
+   * sub-pages are: ids differ per environment.
+   *
+   * These were originally chosen through the admin, and nine of them were
+   * 120x120 thumbnails - invisible as a problem while the banner sat under a
+   * 75% wash, obvious once it was allowed to show. Pinning them here means the
+   * choice is reviewable in a diff instead of living only in the database.
+   */
+  imagePublicId?: string;
 };
 
 /**
@@ -47,6 +58,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "EPCIM",
     summary:
       "Fabrication, installation and hook-up work across offshore platforms and onshore facilities, from structural steelwork through to commissioning support.",
+    imagePublicId: "elatronics/gallery/fqiqfctbwo0gtma2ad0m",
     order: 1,
   },
   {
@@ -55,6 +67,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "EPCIM",
     summary:
       "Marine logistics and asset integrity management, including inspection programmes, condition monitoring and remedial work that keeps offshore assets in service.",
+    imagePublicId: "elatronics/general/hoqaynbgeravjtiixnr7",
     order: 2,
   },
   {
@@ -89,6 +102,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Pipeline construction, pigging, pressure testing and integrity services for gathering lines, trunk lines and associated infrastructure.",
+    imagePublicId: "elatronics/general/p4lbzhhktax6w6itgdq3",
     order: 12,
     body: PIPELINE_BODY,
     capabilities: [
@@ -110,6 +124,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Design, servicing and repair of hydraulic power systems, including cylinder overhaul, flushing to cleanliness specification and on-site troubleshooting.",
+    imagePublicId: "elatronics/gallery/bjqehuckpp1msu3zrbvn",
     order: 13,
   },
   {
@@ -118,6 +133,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Supply, testing, certification and lifecycle tracking of industrial and marine hoses, including scheduled re-testing and register management.",
+    imagePublicId: "elatronics/general/lwgkjfdufrczt6syd4c2",
     order: 14,
   },
   {
@@ -126,6 +142,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Environmental monitoring, sampling and laboratory analysis supporting regulatory compliance and site environmental management plans.",
+    imagePublicId: "elatronics/gallery/dltnokuaax4slo98kgz6",
     order: 15,
   },
   {
@@ -134,6 +151,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Support services for drilling and production operations, covering personnel, equipment provision and site logistics.",
+    imagePublicId: "elatronics/gallery/cz6mxpekbfoggipgeote",
     order: 16,
   },
   {
@@ -142,6 +160,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Overhaul and repair of pumps, compressors, turbines and gearboxes, including alignment, balancing and vibration analysis.",
+    imagePublicId: "elatronics/general/i16pqndjcvm2x9ak5dmh",
     order: 17,
   },
   {
@@ -150,6 +169,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "SERVICE_OFFERING",
     summary:
       "Lifting studies, rigging and heavy haulage for oversized loads, including load-out, transport and installation of major components.",
+    imagePublicId: "elatronics/general/tq2a4ytgyampnrkl0xfb",
     order: 18,
   },
 
@@ -160,6 +180,7 @@ const DIVISIONS: DivisionSeed[] = [
     category: "PROCUREMENT",
     summary:
       "Sourcing and supply of equipment, spares and consumables through established manufacturer and distributor channels, with expediting and inspection.",
+    imagePublicId: "elatronics/gallery/qg2arrnost23tc5bv63a",
     order: 20,
   },
 ];
@@ -176,6 +197,17 @@ type DivisionServiceSeed = {
   title: string;
   summary: string;
   order: number;
+  /** Full copy for the sub-page's own route. Blank leaves "coming soon". */
+  body?: string;
+  /**
+   * Cloudinary publicId of the card/banner image, resolved to a Media row at
+   * seed time. Referenced by publicId rather than by database id because those
+   * ids differ per environment - a hard-coded cuid would break the seed on any
+   * database but the one it was written against. A publicId that is not in the
+   * media table yet simply leaves the image unset, and the sub-page falls back
+   * to its division's banner.
+   */
+  imagePublicId?: string;
 };
 
 const DIVISION_SERVICES: Record<string, DivisionServiceSeed[]> = {
@@ -279,6 +311,169 @@ const DIVISION_SERVICES: Record<string, DivisionServiceSeed[]> = {
       order: 14,
     },
   ],
+
+  /**
+   * Procurement supply lines.
+   *
+   * Written as product categories, not as representation agreements. The
+   * reference site records each of its entries as an appointment by a named
+   * manufacturer - "X has appointed us as its exclusive agent in Nigeria" -
+   * and those are that company's own commercial arrangements, which cannot be
+   * restated for Elatronics without inventing them. What is generic and true
+   * of any procurement division is the category it supplies and how an item in
+   * it gets specified, so that is what these say.
+   *
+   * Starting-point copy, like the division summaries above: the client should
+   * review it, add the OEMs they actually represent, and replace the wording
+   * with their own. The images are picked from the existing media library and
+   * are illustrative rather than photographs of supplied goods.
+   */
+  "global-procurement": [
+    {
+      slug: "valves-actuators",
+      title: "Valves & Actuators",
+      summary:
+        "Gate, globe, ball, butterfly, check and control valves with matching actuation, sourced to the pressure class, body material and trim specified for the service.",
+      body: "Valves are sourced against the line class rather than the line size alone: pressure rating, body and trim material, end connection, seat leakage class and any fire-safe or fugitive-emission requirement are confirmed against the datasheet before an order is placed.\n\nTypical items: gate, globe, ball, butterfly, plug, check and needle valves; control and choke valves; pressure relief and safety valves; manual gearboxes, and electric, pneumatic and hydraulic actuators with their limit switches and positioners.",
+      imagePublicId: "elatronics/gallery/hxnnsfouumu645q7gd1u",
+      order: 1,
+    },
+    {
+      slug: "pumps-pump-spares",
+      title: "Pumps & Pump Spares",
+      summary:
+        "Centrifugal, positive-displacement, metering and submersible pumps, together with mechanical seals, wear parts and OEM spares for units already in service.",
+      body: "New pumps are selected against duty point, fluid properties, NPSH available and the driver and baseplate arrangement already in place, so a replacement drops into the existing foundation and pipework wherever the duty allows.\n\nTypical items: centrifugal, multistage, screw, gear, diaphragm, metering and submersible pumps; mechanical seals and seal support systems; impellers, wear rings, shafts, bearings and casing gaskets; baseplates, couplings and coupling guards.",
+      imagePublicId: "elatronics/gallery/g7qfgnnshsnnhlmey1bb",
+      order: 2,
+    },
+    {
+      slug: "rotating-equipment-spares",
+      title: "Rotating Equipment Spares",
+      summary:
+        "Spares and consumables for turbines, compressors, gearboxes and drivers, identified from nameplate and parts-list data so the part supplied matches the machine installed.",
+      body: "Rotating spares are identified from the machine's nameplate, serial number and OEM parts list rather than from a description, which is what prevents a dimensionally similar part being supplied for a duty it was never rated for.\n\nTypical items: rotors, blades and diaphragms; journal and thrust bearings; labyrinth and dry-gas seals; gears and pinions; couplings; filters, elements and lube-system components; instrumentation and vibration probes.",
+      imagePublicId: "elatronics/general/i16pqndjcvm2x9ak5dmh",
+      order: 3,
+    },
+    {
+      slug: "air-compressors-compressed-air",
+      title: "Air Compressors & Compressed Air Packages",
+      summary:
+        "Instrument and plant air compressors, dryers, receivers and nitrogen generation packages, supplied as units or as complete skid-mounted systems.",
+      body: "Air packages are specified around the actual air demand, dew point and instrument-air quality class required on site, which means quoting the dryer and filtration train rather than the compressor alone.\n\nTypical items: screw, reciprocating and centrifugal compressors; refrigerated and desiccant dryers; air receivers; nitrogen generation packages; coalescing and particulate filters; aftercoolers, separators and condensate management.",
+      imagePublicId: "elatronics/gallery/fkqw6sghekanhltfch82",
+      order: 4,
+    },
+    {
+      slug: "industrial-oil-marine-hoses",
+      title: "Industrial, Oil & Marine Hoses",
+      summary:
+        "Suction, discharge, transfer and dock hoses for oil, chemical, water and dry-bulk service, supplied with the couplings, fittings and test certificates required.",
+      body: "Hoses are supplied against the fluid, working pressure, temperature range and end fitting the application needs, with pressure-test and material certification where the service calls for it.\n\nTypical items: oil suction and discharge hoses; chemical and LPG transfer hoses; floating and submarine hoses; steam, water and air hoses; dry-bulk and food-grade hoses; camlock, flanged and threaded couplings, clamps and safety whip checks.",
+      imagePublicId: "elatronics/general/lwgkjfdufrczt6syd4c2",
+      order: 5,
+    },
+    {
+      slug: "hydraulic-systems-fittings",
+      title: "Hydraulic Systems, Hoses & Fittings",
+      summary:
+        "Hydraulic hoses, adaptors, valves, cylinders and power packs, together with the filtration and conditioning equipment that keeps a system within its cleanliness target.",
+      body: "Hydraulic supply covers the assembly as well as the parts: hose, fitting and adaptor combinations are matched by thread form and pressure rating, so a replacement assembly is a like-for-like fit.\n\nTypical items: hydraulic hoses, fittings and adaptors; directional, pressure and flow control valves; cartridge valves and manifolds; cylinders and power packs; hydraulic pumps and motors; filters, coolers and vacuum dehydration units.",
+      imagePublicId: "elatronics/gallery/bjqehuckpp1msu3zrbvn",
+      order: 6,
+    },
+    {
+      slug: "line-pipe-fittings-flanges",
+      title: "Line Pipe, Fittings & Flanges",
+      summary:
+        "Carbon, alloy and stainless line pipe with matching fittings, flanges and fasteners, supplied with mill certification traceable to the heat number.",
+      body: "Pipe and fittings are supplied to the specified grade, schedule and end preparation, with mill test certificates traceable to the heat, so the material record stands up at inspection.\n\nTypical items: seamless and welded line pipe; elbows, tees, reducers and caps; weld-neck, slip-on, blind and orifice flanges; forged and socket-weld fittings; API tubing and casing couplings; studs, nuts and gaskets.",
+      imagePublicId: "elatronics/general/pdujndw0d7qnfl9vnin7",
+      order: 7,
+    },
+    {
+      slug: "tube-fittings-couplings",
+      title: "Tube Fittings & Couplings",
+      summary:
+        "Instrumentation tube fittings, compression couplings, manifolds and small-bore valves for hydraulic, pneumatic and instrument tubing runs.",
+      body: "Small-bore connections are supplied as a matched system - tube, ferrule and body from the same range - because mixing manufacturers on a compression fitting is a common cause of leaks on instrument lines.\n\nTypical items: single and twin-ferrule compression fittings; instrument tubing in stainless and alloy; needle, ball and check valves; two-, three- and five-valve manifolds; quick-connect couplings; tube clamps and supports.",
+      imagePublicId: "elatronics/general/te8hrsc9wqgqbfvraoot",
+      order: 8,
+    },
+    {
+      slug: "cables-cable-accessories",
+      title: "Cables & Cable Accessories",
+      summary:
+        "Power, control, instrumentation and fibre cables with the glands, terminations and accessories needed for hazardous and general-area installation.",
+      body: "Cable is supplied against the installation's voltage, current, armouring and fire-performance requirements, together with the certified glands and accessories that keep a hazardous-area installation compliant.\n\nTypical items: LV and MV power cables; control and instrumentation cables; fire-resistant and low-smoke zero-halogen types; fibre optic cable; Ex-certified glands, shrouds and adaptors; lugs, ferrules, cleats, trays and ladders.",
+      imagePublicId: "elatronics/general/lwxsvm0yd2vpu39zaay2",
+      order: 9,
+    },
+    {
+      slug: "instrumentation-process-control",
+      title: "Instrumentation & Process Control",
+      summary:
+        "Transmitters, gauges, analysers and final control elements for pressure, temperature, level and flow, supplied with calibration data where required.",
+      body: "Instruments are ordered against the measurement range, process connection, wetted material and hazardous-area certification on the datasheet, with calibration certificates supplied where the loop record needs them.\n\nTypical items: pressure, temperature, level and flow transmitters; gauges, thermowells and RTDs; level gauges and switches; control valves and positioners; analysers and sampling systems; junction boxes, barriers and isolators.",
+      imagePublicId: "elatronics/gallery/r2jrcz7rcvxmwmuqeuhv",
+      order: 10,
+    },
+    {
+      slug: "electrical-equipment-control-panels",
+      title: "Electrical Equipment & Control Panels",
+      summary:
+        "Switchgear, motors, drives, transformers and control panels for plant and utility systems, including Ex-rated equipment for classified areas.",
+      body: "Electrical equipment is specified against the system's fault level, protection philosophy and area classification, so switchgear and enclosures arrive rated for the installation rather than needing rework on site.\n\nTypical items: LV and MV switchgear; motor control centres and starters; variable speed drives; transformers; electric motors; distribution boards and control panels; Ex-rated enclosures, lighting and junction boxes; UPS and battery systems.",
+      imagePublicId: "elatronics/general/yfwexqk7czea4nmatni2",
+      order: 11,
+    },
+    {
+      slug: "wire-rope-slings-lifting-gear",
+      title: "Wire Rope, Slings & Lifting Gear",
+      summary:
+        "Wire rope, chain and synthetic slings, shackles, hooks and lifting accessories supplied with proof-load test and material certification.",
+      body: "Lifting gear is supplied certified: every sling, shackle and accessory carries proof-load test and material certification, and assemblies are made up to the working load limit and configuration the lift plan calls for.\n\nTypical items: wire rope and wire rope slings; chain slings and components; round and webbing slings; bow and dee shackles; eyebolts, hooks, swivels and master links; sockets, thimbles and ferrules; load cells and lifting beams.",
+      imagePublicId: "elatronics/general/hvrghcbv8gkbbturhgng",
+      order: 12,
+    },
+    {
+      slug: "mooring-ropes-fenders",
+      title: "Mooring Ropes, Hawsers & Fenders",
+      summary:
+        "Mooring ropes, hawsers, chains and pneumatic or foam-filled fenders for jetty, ship-to-ship and offshore terminal operations.",
+      body: "Mooring equipment is selected against the vessel size, exposure and berth arrangement, with breaking-load and manufacturing certification supplied for the ropes and chains that carry the load.\n\nTypical items: mooring ropes and hawsers in polyester, polypropylene and HMPE; mooring and chafe chains with accessories; pneumatic and foam-filled fenders; buoys and floats; quick-release hooks; bollards, fairleads and mooring accessories.",
+      imagePublicId: "elatronics/general/xkzlt44zlncazodd14zd",
+      order: 13,
+    },
+    {
+      slug: "filtration-filter-elements",
+      title: "Filtration & Filter Elements",
+      summary:
+        "Filter housings, cartridges and elements for air, gas, hydraulic, lube and process duties, cross-referenced to the units already installed.",
+      body: "Elements are cross-referenced from the installed housing and the original part number, so a replacement matches on micron rating, media, collapse pressure and seal arrangement rather than on dimensions alone.\n\nTypical items: air intake and gas filters; hydraulic and lube oil elements; coalescers and separators; process and cartridge filters; strainers and baskets; filter housings, vessels and differential pressure gauges.",
+      imagePublicId: "elatronics/gallery/ubhph0u4giprilm1nxac",
+      order: 14,
+    },
+    {
+      slug: "water-treatment-equipment",
+      title: "Water Treatment Equipment",
+      summary:
+        "Desalination, potable water and effluent treatment equipment with the membranes, dosing systems and consumables needed to keep a plant in operation.",
+      body: "Water packages are specified against feed-water analysis and the required product quality, including the dosing, filtration and membrane consumables the plant will need through its first operating cycle.\n\nTypical items: reverse osmosis and desalination units; multimedia and cartridge filtration; membranes and membrane cleaning chemicals; dosing skids and metering pumps; UV and chlorination systems; effluent and produced-water treatment equipment.",
+      imagePublicId: "elatronics/gallery/bwqgu1punfmwc4mpicx1",
+      order: 15,
+    },
+    {
+      slug: "lubricants-greases-chemicals",
+      title: "Lubricants, Greases & Industrial Chemicals",
+      summary:
+        "Lubricating oils, greases, cleaning and treatment chemicals supplied in drums, IBCs and bulk, with product and safety data sheets.",
+      body: "Lubricants and chemicals are supplied against the equipment manufacturer's specification and the site's handling and storage arrangements, with product and safety data sheets provided for every consignment.\n\nTypical items: turbine, compressor, hydraulic and gear oils; greases for general and high-temperature service; heat transfer fluids; cleaning and degreasing chemicals; corrosion inhibitors, biocides and scale treatments; desiccants and preservation products.",
+      imagePublicId: "elatronics/gallery/i23ixlixrwf4cpmvbz91",
+      order: 16,
+    },
+  ],
 };
 
 /**
@@ -347,6 +542,16 @@ async function seedSiteSettings() {
 
 async function seedDivisions() {
   for (const d of DIVISIONS) {
+    // Left untouched when the publicId is unknown to this database, so a seed
+    // run against an environment whose media library differs does not blank a
+    // banner that is already set.
+    const image = d.imagePublicId
+      ? await db.media.findUnique({
+          where: { publicId: d.imagePublicId },
+          select: { id: true },
+        })
+      : null;
+
     const data = {
       title: d.title,
       category: d.category,
@@ -359,6 +564,7 @@ async function seedDivisions() {
       // seed knows nothing but the summary of.
       ...(d.body ? { body: d.body } : {}),
       ...(d.capabilities ? { capabilities: d.capabilities } : {}),
+      ...(image ? { heroImageId: image.id } : {}),
     };
 
     await db.division.upsert({
@@ -388,6 +594,18 @@ async function seedDivisionServices() {
     }
 
     for (const s of services) {
+      // Resolved per record rather than in one batch: the list is short, and
+      // a missing image must leave that one record unset rather than abort
+      // the seed. undefined (not null) when absent, so re-running against a
+      // database where an editor has since chosen their own image does not
+      // wipe it.
+      const image = s.imagePublicId
+        ? await db.media.findUnique({
+            where: { publicId: s.imagePublicId },
+            select: { id: true },
+          })
+        : null;
+
       const data = {
         title: s.title,
         summary: s.summary,
@@ -395,6 +613,10 @@ async function seedDivisionServices() {
         order: s.order,
         status: "PUBLISHED" as const,
         publishedAt: new Date(),
+        // Both spread rather than set to null when absent: a re-run must not
+        // wipe a body or an image an editor has added since.
+        ...(s.body ? { body: s.body } : {}),
+        ...(image ? { heroImageId: image.id } : {}),
       };
 
       await db.service.upsert({

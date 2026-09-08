@@ -18,7 +18,7 @@ export type SearchHit = {
   title: string;
   excerpt: string | null;
   href: string;
-  kind: "Division" | "Equipment" | "Project" | "News" | "Certification";
+  kind: "Division" | "Service" | "Equipment" | "Project" | "News" | "Certification";
 };
 
 const MAX_PER_KIND = 6;
@@ -32,7 +32,7 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
 
   const like = { contains: q, mode: "insensitive" as const };
 
-  const [divisions, equipment, projects, posts, certifications] = await Promise.all([
+  const [divisions, services, equipment, projects, posts, certifications] = await Promise.all([
     db.division.findMany({
       where: {
         status: "PUBLISHED",
@@ -40,6 +40,26 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
       },
       take: MAX_PER_KIND,
       select: { id: true, slug: true, title: true, summary: true },
+    }),
+    // A division's sub-pages. Procurement alone can hold dozens of these, and
+    // a visitor hunting for one manufacturer by name would otherwise get the
+    // division and have to scan the grid by eye. Skid-package systems are
+    // excluded — they live under a group, not a division, and have their own
+    // section of the site.
+    db.service.findMany({
+      where: {
+        status: "PUBLISHED",
+        division: { status: "PUBLISHED" },
+        OR: [{ title: like }, { summary: like }, { body: like }],
+      },
+      take: MAX_PER_KIND,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        division: { select: { slug: true } },
+      },
     }),
     db.equipment.findMany({
       where: {
@@ -80,6 +100,14 @@ export async function searchSite(rawQuery: string): Promise<SearchHit[]> {
       id: d.id, title: d.title, excerpt: d.summary,
       href: `/divisions/${d.slug}`, kind: "Division",
     })),
+    ...services.flatMap((s: (typeof services)[number]): SearchHit[] =>
+      s.division
+        ? [{
+            id: s.id, title: s.title, excerpt: s.summary,
+            href: `/divisions/${s.division.slug}/${s.slug}`, kind: "Service",
+          }]
+        : [],
+    ),
     ...equipment.map((e: (typeof equipment)[number]): SearchHit => ({
       id: e.id, title: e.name, excerpt: e.description,
       href: "/equipment", kind: "Equipment",

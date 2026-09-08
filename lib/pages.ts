@@ -20,7 +20,8 @@ export async function getPageHero(slug: string) {
 
   const page = await db.page.findFirst({
     where: { slug, status: "PUBLISHED" },
-    select: { heroImage: { select: { secureUrl: true, alt: true } } },
+    // width feeds PageHero's MIN_BANNER_WIDTH guard.
+    select: { heroImage: { select: { secureUrl: true, alt: true, width: true } } },
   });
   return page?.heroImage ?? null;
 }

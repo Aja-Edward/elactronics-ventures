@@ -13,7 +13,8 @@ export type DivisionSummary = {
   category: "EPCIM" | "SERVICE_OFFERING" | "PROCUREMENT";
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   order: number;
-  linked: number;
+  /** Sub-pages beneath this division — its own child pages, not its projects. */
+  subPages: number;
 };
 
 const CATEGORY_LABEL: Record<DivisionSummary["category"], string> = {
@@ -73,6 +74,17 @@ export default function DivisionRow({
 
       <td className="px-4 py-3 text-sm text-steel-700">
         {CATEGORY_LABEL[division.category]}
+      </td>
+
+      <td className="px-4 py-3 text-sm">
+        <Link
+          href={`/admin/divisions/${division.id}/services`}
+          className="font-medium text-brand-900 hover:text-accent-600"
+        >
+          {division.subPages === 0
+            ? "Add sub-pages"
+            : `${division.subPages} sub-page${division.subPages === 1 ? "" : "s"}`}
+        </Link>
       </td>
 
       <td className="px-4 py-3 text-sm text-steel-700 tabular-nums">{division.order}</td>

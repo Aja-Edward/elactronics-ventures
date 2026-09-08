@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
+import PageHero from "@/components/site/PageHero";
 import WorkWithUs from "@/components/site/WorkWithUs";
 import { findRedirect } from "@/lib/redirects";
 import {
@@ -65,42 +65,14 @@ export default async function SkidPackageSystemPage({
 
   return (
     <>
-      <section className="relative overflow-hidden bg-brand-950">
-        {system.heroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={system.heroImage.secureUrl}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-25"
-            />
-          </div>
-        )}
-        <div className="relative mx-auto max-w-6xl px-6 py-20">
-          <nav aria-label="Breadcrumb" className="text-xs text-steel-300">
-            <Link href="/" className="hover:text-white">
-              Home
-            </Link>
-            <span className="mx-2 text-steel-500">/</span>
-            <Link href="/skid-package-equipment" className="hover:text-white">
-              Skid Package Equipment
-            </Link>
-            <span className="mx-2 text-steel-500">/</span>
-            <span className="text-white">{system.title}</span>
-          </nav>
-
-          <h1 className="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
-            {system.title}
-          </h1>
-          {system.summary && (
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-brand-200">
-              {system.summary}
-            </p>
-          )}
-        </div>
-      </section>
+      <PageHero
+        title={system.title}
+        intro={system.summary ?? undefined}
+        trail={[
+          { label: "Skid Package Equipment", href: "/skid-package-equipment" },
+        ]}
+        image={system.heroImage}
+      />
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-6xl px-6">

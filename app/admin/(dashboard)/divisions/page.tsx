@@ -21,7 +21,7 @@ export default async function DivisionsPage() {
       category: true,
       status: true,
       order: true,
-      _count: { select: { projects: true, services: true } },
+      _count: { select: { services: true } },
     },
   });
 
@@ -32,7 +32,7 @@ export default async function DivisionsPage() {
     category: r.category,
     status: r.status,
     order: r.order,
-    linked: r._count.projects + r._count.services,
+    subPages: r._count.services,
   }));
 
   const published = divisions.filter((d) => d.status === "PUBLISHED").length;
@@ -62,10 +62,10 @@ export default async function DivisionsPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-brand-100 bg-surface">
-                {["Division", "Category", "Order", "Status", ""].map((h, i) => (
+                {["Division", "Category", "Sub-pages", "Order", "Status", ""].map((h, i) => (
                   <th
                     key={h || i}
-                    className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-steel-600 ${i === 4 ? "text-right" : ""}`}
+                    className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-steel-600 ${i === 5 ? "text-right" : ""}`}
                   >
                     {h}
                   </th>

@@ -3,13 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
+import PageHero from "@/components/site/PageHero";
 import {
   CATEGORY_LABEL,
+  SUBPAGE_HEADING,
   getDivisionBySlug,
-  
   type DivisionCategory,
 } from "@/lib/divisions";
 import { getDivisionSlugs } from "@/lib/divisions";
+import { getDefaultBanner } from "@/lib/hero";
+import { MIN_CARD_WIDTH, bigEnough } from "@/lib/images";
 import { findRedirect } from "@/lib/redirects";
 
 /**
@@ -85,43 +88,25 @@ export default async function DivisionPage({
     notFound();
   }
 
+  // Same chain as the cards below, evaluated once: a sub-page's own photo, then
+  // the division's, then the site's. Only reached when neither of the first two
+  // is usable, so the usual case adds no query.
+  const cardFallbackNeeded = division.services.some(
+    (service) =>
+      !bigEnough(service.heroImage, MIN_CARD_WIDTH) &&
+      !bigEnough(division.heroImage, MIN_CARD_WIDTH),
+  );
+  const cardFallback = cardFallbackNeeded ? await getDefaultBanner() : null;
+
   return (
     <>
-      <section className="relative overflow-hidden bg-brand-950">
-        {division.heroImage && (
-          <div className="absolute inset-0">
-            <Image
-              src={division.heroImage.secureUrl}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover opacity-25"
-            />
-          </div>
-        )}
-        <div className="relative mx-auto max-w-6xl px-6 py-20">
-          <nav aria-label="Breadcrumb" className="text-xs text-steel-300">
-            <Link href="/divisions" className="hover:text-white">
-              Divisions
-            </Link>
-            <span className="mx-2 text-steel-500">/</span>
-            <span className="text-white">{division.title}</span>
-          </nav>
-
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-steel-300">
-            {CATEGORY_LABEL[division.category as DivisionCategory]}
-          </p>
-          <h1 className="mt-3 max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl">
-            {division.title}
-          </h1>
-          {division.summary && (
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-brand-200">
-              {division.summary}
-            </p>
-          )}
-        </div>
-      </section>
+      <PageHero
+        title={division.title}
+        eyebrow={CATEGORY_LABEL[division.category as DivisionCategory]}
+        intro={division.summary ?? undefined}
+        trail={[{ label: "Divisions", href: "/divisions" }]}
+        image={division.heroImage}
+      />
 
       <section className="bg-white py-16">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1.7fr_1fr]">
@@ -130,43 +115,16 @@ export default async function DivisionPage({
               // Stored as plain text today. When the editor gains rich text,
               // this becomes the single place that needs to change.
               <div className="prose-measure space-y-4">
-                {division.body
-                  .split(/\n{2,}/)
-                  .map((paragraph, i) => (
-                    <p key={i} className="leading-relaxed text-steel-800">
-                      {paragraph}
-                    </p>
-                  ))}
+                {division.body.split(/\n{2,}/).map((paragraph, i) => (
+                  <p key={i} className="leading-relaxed text-steel-800">
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             ) : (
               <p className="text-sm text-steel-600">
                 Detailed description coming soon.
               </p>
-            )}
-
-            {division.services.length > 0 && (
-              <div className="mt-12">
-                <h2 className="font-display text-2xl font-bold tracking-tight text-brand-900">
-                  Services
-                </h2>
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  {division.services.map((service) => (
-                    <div
-                      key={service.id}
-                      className="rounded-lg border border-brand-100 bg-surface p-5"
-                    >
-                      <h3 className="font-display text-base font-semibold text-brand-900">
-                        {service.title}
-                      </h3>
-                      {service.summary && (
-                        <p className="mt-1.5 text-sm leading-relaxed text-steel-700">
-                          {service.summary}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
             )}
 
             {division.projects.length > 0 && (
@@ -233,6 +191,71 @@ export default async function DivisionPage({
           </aside>
         </div>
       </section>
+
+      {/* The division's sub-pages. Full width rather than inside the two-column
+          block above, because a division like procurement carries dozens of
+          them and they are the substance of the page, not an aside. */}
+      {division.services.length > 0 && (
+        <section className="border-t border-brand-100 bg-surface py-16">
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="font-display text-2xl font-bold tracking-tight text-brand-900">
+              {SUBPAGE_HEADING[division.category as DivisionCategory]}
+            </h2>
+            <p className="mt-1.5 text-sm text-steel-700">
+              {division.services.length}{" "}
+              {division.services.length === 1 ? "entry" : "entries"} — open one
+              for the full scope, products and applications.
+            </p>
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {division.services.map((service) => {
+                // A record with no photograph of its own borrows the
+                // division's, so the grid never renders a row of grey boxes
+                // while an editor is still working through the images. Each
+                // step is size-checked: inheriting a thumbnail from the
+                // division would spread the same bad image across every card.
+                const image =
+                  bigEnough(service.heroImage, MIN_CARD_WIDTH) ??
+                  bigEnough(division.heroImage, MIN_CARD_WIDTH) ??
+                  cardFallback;
+
+                return (
+                  <Link
+                    key={service.id}
+                    href={`/divisions/${division.slug}/${service.slug}`}
+                    className="group flex flex-col overflow-hidden rounded-lg border border-brand-100 bg-white transition-colors hover:border-brand-300"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden bg-brand-50">
+                      {image && (
+                        <Image
+                          src={image.secureUrl}
+                          alt={image.alt ?? ""}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="font-display text-base font-semibold leading-snug text-brand-900 group-hover:text-accent-600">
+                        {service.title}
+                      </h3>
+                      {service.summary && (
+                        <p className="mt-2 flex-1 text-sm leading-relaxed text-steel-700">
+                          {service.summary}
+                        </p>
+                      )}
+                      <span className="mt-4 text-xs font-semibold uppercase tracking-wide text-accent-600">
+                        Read more
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

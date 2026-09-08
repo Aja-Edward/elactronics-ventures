@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import DivisionForm, {
@@ -78,9 +79,21 @@ export default async function EditDivisionPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-3xl font-bold tracking-tight text-brand-900">
-        {creating ? "New division" : values.title}
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-brand-900">
+          {creating ? "New division" : values.title}
+        </h1>
+        {/* Only once the division exists: sub-pages have to hang off a saved
+            row, and offering the link while creating would lead nowhere. */}
+        {division && (
+          <Link
+            href={`/admin/divisions/${division.id}/services`}
+            className="rounded border border-brand-200 px-4 py-2 text-sm font-semibold text-brand-900 transition-colors hover:bg-brand-50"
+          >
+            Sub-pages
+          </Link>
+        )}
+      </div>
       <DivisionForm values={values} media={media as MediaOption[]} />
     </div>
   );
